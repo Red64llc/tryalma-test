@@ -25,12 +25,15 @@ from tryalma.g28.models import (
     G28FormData,
     NoticeOfAppearance,
 )
+from tryalma.g28.cli import parse_g28
 from tryalma.g28.field_extractor import FieldExtractor
 from tryalma.g28.output_formatter import OutputFormatter
 from tryalma.g28.parser_service import G28ParserService
 from tryalma.g28.vision_extractor import VisionExtractor
 
 __all__ = [
+    # CLI
+    "parse_g28",
     # Exceptions
     "G28ExtractionError",
     "NotG28FormError",

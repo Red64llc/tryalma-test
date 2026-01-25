@@ -217,7 +217,7 @@
 
 ## Task 8: CLI Command
 
-- [ ] 8.1 Define parse-g28 command with Typer
+- [x] 8.1 Define parse-g28 command with Typer
   - Accept file path as required positional argument
   - Add --output option for writing to file instead of stdout
   - Add --format option accepting "json" or "yaml" with json default
@@ -225,7 +225,7 @@
   - Validate file existence and readability via Typer constraints
   - _Requirements: 9.1, 9.3, 9.4, 9.6_
 
-- [ ] 8.2 Implement command execution logic
+- [x] 8.2 Implement command execution logic
   - Initialize G28ParserService with default dependencies
   - Invoke parse() with provided arguments
   - Output JSON to stdout by default
@@ -233,14 +233,14 @@
   - Display progress information in verbose mode
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.6_
 
-- [ ] 8.3 Implement CLI error handling
+- [x] 8.3 Implement CLI error handling
   - Catch G28-specific exceptions and display user-friendly messages
   - Write error messages to stderr
   - Exit with appropriate exit codes (2 for validation, 3 for processing errors)
   - Never expose stack traces to users
   - _Requirements: 9.5, 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 8.4 Register command with main CLI application
+- [x] 8.4 Register command with main CLI application
   - Add parse-g28 command to existing Typer app in cli.py
   - Ensure command appears in --help output
   - Follow existing CLI patterns and conventions

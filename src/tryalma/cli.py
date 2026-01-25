@@ -3,12 +3,16 @@
 import typer
 
 from tryalma.core import get_greeting
+from tryalma.g28.cli import parse_g28
 
 app = typer.Typer(
     name="tryalma",
     help="TryAlma CLI - A sample CLI and API application.",
     add_completion=False,
 )
+
+# Task 8.4: Register parse-g28 command with main CLI application
+app.command("parse-g28")(parse_g28)
 
 
 @app.command()
