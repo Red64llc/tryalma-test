@@ -91,3 +91,6 @@ Thumbs.db
 .env.*.local
 secrets.yaml
 secrets.json
+
+# Datasets
+datasets/

@@ -12,6 +12,14 @@ dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
     "typer>=0.15.0",
+    "albumentations>=2.0.8",
+    "opencv-python>=4.13.0.90",
+    "datasets>=4.5.0",
+    "pillow>=12.1.0",
+    "midv500>=0.2.1",
+    "passporteye>=2.2.2",
+    "mrz>=0.6.2",
+    "rich>=13.0.0",
 ]
 
 [project.scripts]
