@@ -6,8 +6,10 @@ including Tesseract dependency detection.
 Requirements: 1.5, 2.1-2.8, 5.3, 6.1
 """
 
+import tempfile
 from pathlib import Path
 
+import cv2
 from passporteye import read_mrz
 
 from tryalma.passport.exceptions import (
@@ -64,6 +66,43 @@ class MRZExtractor:
         """
         return get_tesseract_install_instructions()
 
+    def _convert_tiff_with_opencv(self, image_path: Path) -> Path:
+        """Convert a problematic TIFF file using OpenCV.
+
+        Some TIFF files use YCbCr chroma subsampling without JPEG compression,
+        which Pillow/imageio/tifffile cannot handle. OpenCV's libtiff backend
+        has broader support for exotic TIFF formats.
+
+        Args:
+            image_path: Path to the TIFF file.
+
+        Returns:
+            Path to a temporary PNG file with the converted image.
+
+        Raises:
+            ImageReadError: If OpenCV also cannot read the file.
+        """
+        try:
+            # OpenCV's libtiff backend handles exotic TIFF formats
+            img_array = cv2.imread(str(image_path))
+
+            if img_array is None:
+                raise ImageReadError(
+                    f"Could not read TIFF file: {image_path.name}. OpenCV returned None"
+                )
+
+            # Create temp file and save as PNG
+            temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+            cv2.imwrite(temp_file.name, img_array)
+
+            return Path(temp_file.name)
+        except ImageReadError:
+            raise
+        except Exception as e:
+            raise ImageReadError(
+                f"Could not read TIFF file: {image_path.name}. {e}"
+            )
+
     def extract(self, image_path: Path) -> RawMRZData:
         """Extract MRZ data from a passport image.
 
@@ -86,6 +125,7 @@ class MRZExtractor:
                 f"Supported formats: {', '.join(sorted(self.SUPPORTED_EXTENSIONS))}"
             )
 
+        temp_png_path: Path | None = None
         try:
             # Call PassportEye to extract MRZ
             mrz_result = read_mrz(str(image_path))
@@ -95,8 +135,29 @@ class MRZExtractor:
             if "tesseract" in error_msg:
                 if not check_tesseract_installed():
                     raise TesseractNotFoundError()
-            # Otherwise treat as image read error
-            raise ImageReadError(f"Could not read image file: {image_path.name}. {e}")
+
+            # Check if this is a TIFF with chroma subsampling issue
+            if "chroma subsampling" in error_msg and image_path.suffix.lower() in {
+                ".tif",
+                ".tiff",
+            }:
+                # Try OpenCV fallback (has broader TIFF format support)
+                temp_png_path = self._convert_tiff_with_opencv(image_path)
+                try:
+                    mrz_result = read_mrz(str(temp_png_path))
+                except Exception as retry_error:
+                    raise ImageReadError(
+                        f"Could not read image file: {image_path.name}. {retry_error}"
+                    )
+                finally:
+                    # Clean up temp file
+                    if temp_png_path and temp_png_path.exists():
+                        temp_png_path.unlink()
+            else:
+                # Otherwise treat as image read error
+                raise ImageReadError(
+                    f"Could not read image file: {image_path.name}. {e}"
+                )
 
         # Check if MRZ was found
         if mrz_result is None:

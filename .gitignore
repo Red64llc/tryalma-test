@@ -92,5 +92,17 @@ Thumbs.db
 secrets.yaml
 secrets.json
 
-# Datasets
-datasets/
+# Datasets - keep only sample files and scripts
+# Ignore archives and downloaded data
+datasets/*.zip
+datasets/archive.zip
+datasets/raw/
+datasets/augmented/
+datasets/organized/
+datasets/metadata.json
+datasets/countries.json
+
+# Keep sample files (UAE passports), scripts and docs
+!datasets/samples/
+!datasets/scripts/
+!datasets/README.md

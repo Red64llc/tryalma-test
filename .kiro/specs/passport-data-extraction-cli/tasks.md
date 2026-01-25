@@ -120,15 +120,15 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Show summary statistics after batch processing (total, successful, failed)
   - _Requirements: 3.1, 3.2, 4.4_
 
-- [ ] 8. Integration testing and validation
-- [ ] 8.1 Implement unit tests for core components
+- [x] 8. Integration testing and validation
+- [x] 8.1 Implement unit tests for core components
   - Test MRZExtractor with valid passport images and edge cases
   - Test MRZValidator check digit validation for TD1 and TD3 formats
   - Test OutputFormatter produces valid JSON and CSV output
   - Test PassportExtractionService orchestration and error handling
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 8.2 Implement CLI integration tests
+- [x] 8.2 Implement CLI integration tests
   - Test extract command with single image file
   - Test extract command with directory batch processing
   - Test all output formats (table, json, csv)
@@ -136,7 +136,7 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Test help output and usage messages
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 5.4, 7.1, 7.2, 7.3_
 
-- [ ]* 8.3 Implement contract tests for external libraries
+- [x] 8.3 Implement contract tests for external libraries
   - Test PassportEye API returns expected structure for valid passports
   - Test mrz library checker behavior for validation scenarios
   - Document expected behavior for future compatibility verification

@@ -373,3 +373,187 @@ class TestMRZExtractorTesseractErrorHandling:
 
         with pytest.raises(TesseractNotFoundError):
             extractor.extract(temp_passport_image)
+
+
+class TestMRZExtractorOpenCVFallback:
+    """Tests for OpenCV fallback handling of problematic TIFF files."""
+
+    @patch("tryalma.passport.extractor.read_mrz")
+    @patch("tryalma.passport.extractor.cv2.imread")
+    @patch("tryalma.passport.extractor.cv2.imwrite")
+    def test_extract_uses_opencv_fallback_on_chroma_subsampling_error(
+        self,
+        mock_cv2_imwrite: MagicMock,
+        mock_cv2_imread: MagicMock,
+        mock_read_mrz: MagicMock,
+        tmp_path: Path,
+    ):
+        """Test extract uses OpenCV when chroma subsampling error occurs."""
+        import numpy as np
+
+        from tryalma.passport.extractor import MRZExtractor
+
+        # Create a TIFF file
+        tiff_path = tmp_path / "passport.tif"
+        tiff_path.touch()
+
+        # First call fails with chroma subsampling error, second succeeds
+        mock_result = MagicMock()
+        mock_result.mrz_type = "TD3"
+        mock_result.valid = True
+        mock_result.valid_score = 1.0
+        mock_result.country = "UTO"
+        mock_result.nationality = "UTO"
+        mock_result.surname = "SMITH"
+        mock_result.names = "JOHN"
+        mock_result.number = "123456789"
+        mock_result.date_of_birth = "850315"
+        mock_result.sex = "M"
+        mock_result.expiration_date = "300314"
+        mock_result.personal_number = ""
+        mock_result.aux = MagicMock(text="P<UTO...")
+
+        mock_read_mrz.side_effect = [
+            Exception("chroma subsampling not supported without JPEG compression"),
+            mock_result,
+        ]
+
+        # cv2.imread returns a valid numpy array (BGR image)
+        mock_cv2_imread.return_value = np.zeros((100, 100, 3), dtype=np.uint8)
+        mock_cv2_imwrite.return_value = True
+
+        extractor = MRZExtractor()
+        result = extractor.extract(tiff_path)
+
+        # Verify cv2.imread was called
+        mock_cv2_imread.assert_called_once()
+        # Verify read_mrz was called twice (original + fallback)
+        assert mock_read_mrz.call_count == 2
+        # Verify extraction succeeded
+        assert result.surname == "SMITH"
+
+    @patch("tryalma.passport.extractor.read_mrz")
+    @patch("tryalma.passport.extractor.cv2.imread")
+    @patch("tryalma.passport.extractor.cv2.imwrite")
+    def test_extract_opencv_fallback_cleans_up_temp_file(
+        self,
+        mock_cv2_imwrite: MagicMock,
+        mock_cv2_imread: MagicMock,
+        mock_read_mrz: MagicMock,
+        tmp_path: Path,
+    ):
+        """Test that temp PNG file is cleaned up after OpenCV fallback."""
+        import numpy as np
+
+        from tryalma.passport.extractor import MRZExtractor
+
+        tiff_path = tmp_path / "passport.tif"
+        tiff_path.touch()
+
+        mock_result = MagicMock()
+        mock_result.mrz_type = "TD3"
+        mock_result.valid = True
+        mock_result.valid_score = 1.0
+        mock_result.country = "UTO"
+        mock_result.nationality = "UTO"
+        mock_result.surname = "SMITH"
+        mock_result.names = "JOHN"
+        mock_result.number = "123456789"
+        mock_result.date_of_birth = "850315"
+        mock_result.sex = "M"
+        mock_result.expiration_date = "300314"
+        mock_result.personal_number = ""
+        mock_result.aux = MagicMock(text="P<UTO...")
+
+        mock_read_mrz.side_effect = [
+            Exception("chroma subsampling not supported"),
+            mock_result,
+        ]
+        mock_cv2_imread.return_value = np.zeros((100, 100, 3), dtype=np.uint8)
+        mock_cv2_imwrite.return_value = True
+
+        extractor = MRZExtractor()
+        extractor.extract(tiff_path)
+
+        # Verify extraction completed without error (temp file cleanup is implicit)
+
+    @patch("tryalma.passport.extractor.read_mrz")
+    @patch("tryalma.passport.extractor.cv2.imread")
+    @patch("tryalma.passport.extractor.cv2.imwrite")
+    def test_extract_opencv_fallback_raises_error_if_both_fail(
+        self,
+        mock_cv2_imwrite: MagicMock,
+        mock_cv2_imread: MagicMock,
+        mock_read_mrz: MagicMock,
+        tmp_path: Path,
+    ):
+        """Test that ImageReadError is raised if OpenCV fallback also fails."""
+        import numpy as np
+
+        from tryalma.passport.exceptions import ImageReadError
+        from tryalma.passport.extractor import MRZExtractor
+
+        tiff_path = tmp_path / "passport.tif"
+        tiff_path.touch()
+
+        # First call fails with chroma subsampling, second also fails
+        mock_read_mrz.side_effect = [
+            Exception("chroma subsampling not supported"),
+            Exception("Still cannot read"),
+        ]
+        mock_cv2_imread.return_value = np.zeros((100, 100, 3), dtype=np.uint8)
+        mock_cv2_imwrite.return_value = True
+
+        extractor = MRZExtractor()
+
+        with pytest.raises(ImageReadError) as exc_info:
+            extractor.extract(tiff_path)
+
+        assert "Still cannot read" in str(exc_info.value)
+
+    @patch("tryalma.passport.extractor.read_mrz")
+    @patch("tryalma.passport.extractor.cv2.imread")
+    def test_extract_opencv_fallback_raises_error_if_opencv_returns_none(
+        self,
+        mock_cv2_imread: MagicMock,
+        mock_read_mrz: MagicMock,
+        tmp_path: Path,
+    ):
+        """Test that ImageReadError is raised if OpenCV cannot read the file."""
+        from tryalma.passport.exceptions import ImageReadError
+        from tryalma.passport.extractor import MRZExtractor
+
+        tiff_path = tmp_path / "passport.tif"
+        tiff_path.touch()
+
+        mock_read_mrz.side_effect = Exception("chroma subsampling not supported")
+        mock_cv2_imread.return_value = None  # cv2.imread returns None on failure
+
+        extractor = MRZExtractor()
+
+        with pytest.raises(ImageReadError) as exc_info:
+            extractor.extract(tiff_path)
+
+        assert "OpenCV returned None" in str(exc_info.value)
+
+    @patch("tryalma.passport.extractor.read_mrz")
+    def test_extract_does_not_use_opencv_fallback_for_non_tiff_files(
+        self,
+        mock_read_mrz: MagicMock,
+        tmp_path: Path,
+    ):
+        """Test that OpenCV fallback is only used for TIFF files."""
+        from tryalma.passport.exceptions import ImageReadError
+        from tryalma.passport.extractor import MRZExtractor
+
+        # Create a JPG file
+        jpg_path = tmp_path / "passport.jpg"
+        jpg_path.touch()
+
+        # Fail with chroma subsampling error (shouldn't trigger OpenCV for jpg)
+        mock_read_mrz.side_effect = Exception("chroma subsampling not supported")
+
+        extractor = MRZExtractor()
+
+        with pytest.raises(ImageReadError):
+            extractor.extract(jpg_path)
