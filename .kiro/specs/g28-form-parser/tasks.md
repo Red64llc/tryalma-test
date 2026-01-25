@@ -248,13 +248,13 @@
 
 ## Task 9: Integration Testing
 
-- [ ] 9.1 Create test fixtures with sample G-28 documents
+- [x] 9.1 Create test fixtures with sample G-28 documents
   - Use example form from docs/Example_G-28.pdf as primary fixture
   - Create synthetic test images with known field values
   - Create edge case documents (partially filled, poor quality, wrong form type)
   - _Requirements: 1.1, 1.2, 1.5_
 
-- [ ] 9.2 Implement parser service integration tests
+- [x] 9.2 Implement parser service integration tests
   - Test end-to-end parsing with test PDF document
   - Test parsing with test image documents
   - Verify all form sections are extracted
@@ -262,7 +262,7 @@
   - Verify output format is correct for JSON and YAML
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-- [ ] 9.3 Implement CLI integration tests
+- [x] 9.3 Implement CLI integration tests
   - Test CLI invocation with CliRunner
   - Verify JSON output to stdout
   - Verify file output with --output option
@@ -271,7 +271,7 @@
   - Test error handling and exit codes
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
-- [ ] 9.4 Implement error scenario tests
+- [x] 9.4 Implement error scenario tests
   - Test handling of non-G28 documents
   - Test handling of unsupported file formats
   - Test handling of missing files
@@ -290,7 +290,7 @@
   - Test image loading and RGB conversion
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 10.2 (P) Implement data model unit tests
+- [x] 10.2 (P) Implement data model unit tests
   - Test Pydantic model validation rules
   - Test field constraint enforcement (confidence range 0.0-1.0)
   - Test date normalization in model validation
