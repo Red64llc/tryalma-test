@@ -1,0 +1,1 @@
+"""Passport data extraction module."""

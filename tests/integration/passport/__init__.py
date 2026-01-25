@@ -1,0 +1,1 @@
+"""Passport extraction integration tests."""
