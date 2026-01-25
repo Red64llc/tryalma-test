@@ -4,6 +4,7 @@ import typer
 
 from tryalma.core import get_greeting
 from tryalma.passport.cli import app as passport_app
+from tryalma.g28.cli import parse_g28
 
 app = typer.Typer(
     name="tryalma",
@@ -13,6 +14,9 @@ app = typer.Typer(
 
 # Register passport sub-command
 app.add_typer(passport_app, name="passport")
+
+# Register parse-g28 command
+app.command("parse-g28")(parse_g28)
 
 
 @app.command()
