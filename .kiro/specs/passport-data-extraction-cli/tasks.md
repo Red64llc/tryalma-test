@@ -37,8 +37,8 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Define ImageReadError for corrupted or unreadable files
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 3. Implement MRZ extraction layer
-- [ ] 3.1 Implement MRZ extractor core functionality
+- [x] 3. Implement MRZ extraction layer
+- [x] 3.1 Implement MRZ extractor core functionality
   - Create MRZExtractor class that wraps PassportEye read_mrz function
   - Define supported image extensions constant (jpg, jpeg, png, tiff, tif)
   - Implement is_supported_format method to validate file extensions
@@ -46,7 +46,7 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Handle PassportEye failures and translate to appropriate exceptions
   - _Requirements: 1.5, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 6.1_
 
-- [ ] 3.2 Implement Tesseract dependency detection
+- [x] 3.2 Implement Tesseract dependency detection
   - Implement check_tesseract_installed static method to verify OCR availability
   - Implement get_tesseract_install_instructions static method with platform detection
   - Provide macOS (brew), Linux (apt), and Windows installation guidance

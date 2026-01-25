@@ -12,6 +12,7 @@ from tryalma.passport.exceptions import (
     TesseractNotFoundError,
     UnsupportedFormatError,
 )
+from tryalma.passport.extractor import MRZExtractor
 from tryalma.passport.models import (
     CheckDigitResult,
     ExtractionResult,
@@ -29,6 +30,8 @@ __all__ = [
     "MRZType",
     "ValidationResult",
     "CheckDigitResult",
+    # Extractor
+    "MRZExtractor",
     # Exceptions
     "PassportExtractionError",
     "MRZNotFoundError",
