@@ -178,13 +178,13 @@
 
 ## Task 7: Parser Service Orchestration
 
-- [ ] 7.1 Implement G28ParserService constructor with dependency injection
+- [x] 7.1 Implement G28ParserService constructor with dependency injection
   - Accept DocumentLoader, FieldExtractor, and OutputFormatter as dependencies
   - Accept configurable confidence threshold with default of 0.7
   - Design as stateless and thread-safe for singleton usage
   - _Requirements: 1.1, 1.2, 10.3_
 
-- [ ] 7.2 Implement parse() method for file path input
+- [x] 7.2 Implement parse() method for file path input
   - Accept file path, output format, and verbose flag
   - Coordinate document loading, field extraction, and output formatting
   - Apply confidence threshold to flag uncertain fields
@@ -193,7 +193,7 @@
   - Handle exceptions and return appropriate error result
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 9.1, 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 7.3 Implement parse_bytes() method for web upload support
+- [x] 7.3 Implement parse_bytes() method for web upload support
   - Accept raw bytes, filename, output format, and verbose flag
   - Detect format from filename and validate
   - Delegate to DocumentLoader.load_bytes() for image conversion
@@ -201,14 +201,14 @@
   - Return G28ExtractionResult suitable for Flask/web integration
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 7.4 Implement parse_images() method for pre-loaded images
+- [x] 7.4 Implement parse_images() method for pre-loaded images
   - Accept list of PIL Images directly
   - Bypass document loading phase
   - Process through extraction and formatting pipeline
   - Support use cases where images are already loaded or preprocessed
   - _Requirements: 1.1, 1.2_
 
-- [ ] 7.5 Implement create_default() factory method
+- [x] 7.5 Implement create_default() factory method
   - Create service with default DocumentLoader, VisionExtractor-based FieldExtractor, and OutputFormatter
   - Accept optional API key parameter, defaulting to ANTHROPIC_API_KEY environment variable
   - Return fully configured G28ParserService ready for use

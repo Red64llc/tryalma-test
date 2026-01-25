@@ -27,6 +27,7 @@ from tryalma.g28.models import (
 )
 from tryalma.g28.field_extractor import FieldExtractor
 from tryalma.g28.output_formatter import OutputFormatter
+from tryalma.g28.parser_service import G28ParserService
 from tryalma.g28.vision_extractor import VisionExtractor
 
 __all__ = [
@@ -50,6 +51,7 @@ __all__ = [
     "G28FormData",
     "G28ExtractionResult",
     # Services
+    "G28ParserService",
     "VisionExtractor",
     "FieldExtractor",
     "OutputFormatter",
