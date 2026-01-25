@@ -14,22 +14,22 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Add pytest fixtures for passport extraction testing (sample images, mock data)
   - _Requirements: 5.3_
 
-- [ ] 2. Implement domain models and exception hierarchy
-- [ ] 2.1 (P) Create passport data structures
+- [x] 2. Implement domain models and exception hierarchy
+- [x] 2.1 (P) Create passport data structures
   - Define PassportData dataclass with all passport fields (surname, given_names, date_of_birth, nationality, passport_number, expiry_date, sex, place_of_birth)
   - Include MRZ metadata fields (mrz_type, mrz_valid, check_digit_errors, confidence, raw_mrz)
   - Implement to_dict method for serialization with verbose option
   - Implement get_unavailable_fields method to identify missing data
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.3_
 
-- [ ] 2.2 (P) Create extraction result and raw MRZ data structures
+- [x] 2.2 (P) Create extraction result and raw MRZ data structures
   - Define ExtractionResult dataclass with success flag, data, error message, and source file
   - Define RawMRZData dataclass for PassportEye output (mrz_type, raw_text, all extracted fields, confidence)
   - Define ValidationResult and CheckDigitResult dataclasses for MRZ validation outcomes
   - Define MRZType enum for TD1, TD2, TD3, MRVA, MRVB formats
   - _Requirements: 6.1, 6.2, 6.4_
 
-- [ ] 2.3 (P) Create passport-specific exception classes
+- [x] 2.3 (P) Create passport-specific exception classes
   - Define PassportExtractionError as base exception extending ProcessingError
   - Define MRZNotFoundError for images without detectable MRZ
   - Define UnsupportedFormatError for unsupported image formats
