@@ -123,13 +123,13 @@
 
 ## Task 4: Vision Extraction Backend
 
-- [ ] 4.1 (P) Implement Claude Vision API client setup
+- [x] 4.1 (P) Implement Claude Vision API client setup
   - Initialize Anthropic client with API key from parameter or environment variable
   - Configure model constant (claude-sonnet-4-20250514) and max tokens
   - Handle authentication errors gracefully
   - _Requirements: 8.6_
 
-- [ ] 4.2 Implement structured extraction with schema
+- [x] 4.2 Implement structured extraction with schema
   - Construct prompts that describe G-28 form fields for extraction
   - Encode page images to base64 for API submission
   - Process multi-page documents by including all pages in single request
@@ -137,7 +137,7 @@
   - Calculate per-field confidence based on extraction certainty indicators
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 7.1, 7.2, 7.3, 8.6_
 
-- [ ] 4.3 Implement API error handling and retry logic
+- [x] 4.3 Implement API error handling and retry logic
   - Handle rate limit errors (429) with exponential backoff
   - Handle server errors (500) with retry
   - Handle authentication errors (401) with clear message
@@ -304,7 +304,7 @@
   - Test exception inheritance chain
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-- [ ] 10.4 Implement VisionExtractor contract tests
+- [x] 10.4 Implement VisionExtractor contract tests
   - Mock Claude API responses with expected schema
   - Test successful extraction parses to model correctly
   - Test API error handling (rate limit, auth, server errors)

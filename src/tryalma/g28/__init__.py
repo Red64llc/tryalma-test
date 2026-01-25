@@ -25,6 +25,7 @@ from tryalma.g28.models import (
     G28FormData,
     NoticeOfAppearance,
 )
+from tryalma.g28.vision_extractor import VisionExtractor
 
 __all__ = [
     # Exceptions
@@ -46,4 +47,6 @@ __all__ = [
     "AdditionalInfo",
     "G28FormData",
     "G28ExtractionResult",
+    # Extractors
+    "VisionExtractor",
 ]
