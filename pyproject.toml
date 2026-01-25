@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tryalma"
+version = "0.1.0"
+description = "TryAlma CLI and API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "typer>=0.15.0",
+]
+
+[project.scripts]
+tryalma = "tryalma.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
+    "httpx>=0.28.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --cov=tryalma --cov-report=term-missing --cov-fail-under=90"
+
+[tool.coverage.run]
+source = ["src/tryalma"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tryalma"]
