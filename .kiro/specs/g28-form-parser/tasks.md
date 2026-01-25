@@ -2,19 +2,19 @@
 
 ## Task 1: Core Data Models
 
-- [ ] 1.1 (P) Create the base extracted field model with confidence scoring
+- [x] 1.1 (P) Create the base extracted field model with confidence scoring
   - Implement a generic field wrapper that holds a value alongside a confidence score
   - Support marking fields as uncertain when confidence falls below a configurable threshold
   - Ensure the model is immutable and JSON-serializable via Pydantic
   - _Requirements: 8.6_
 
-- [ ] 1.2 (P) Create address and contact information models
+- [x] 1.2 (P) Create address and contact information models
   - Define an address structure covering US and international fields (street, city, state, ZIP, province, postal code, country)
   - Support apartment/suite/floor designations
   - Allow all fields to be optional since forms may have partial data
   - _Requirements: 2.3, 5.6_
 
-- [ ] 1.3 Create Part 1 attorney information model
+- [x] 1.3 Create Part 1 attorney information model
   - Capture attorney name fields (family name, given name, middle name)
   - Include USCIS Online Account Number
   - Include contact fields (daytime telephone, mobile telephone, email, fax)
@@ -22,7 +22,7 @@
   - Represent empty or N/A fields as null
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 1.4 (P) Create Part 2 eligibility information model
+- [x] 1.4 (P) Create Part 2 eligibility information model
   - Capture attorney eligibility checkbox (is_attorney)
   - Include licensing authority, bar number, and disciplinary order status
   - Include law firm or organization name
@@ -30,14 +30,14 @@
   - Support association and law student/graduate checkboxes with associated names
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-- [ ] 1.5 (P) Create Part 3 notice of appearance model
+- [x] 1.5 (P) Create Part 3 notice of appearance model
   - Capture agency checkboxes (USCIS, ICE, CBP) as booleans
   - Include form numbers or matter descriptions for each agency
   - Include receipt number field
   - Capture representation type as a literal enum (Applicant, Petitioner, Requestor, Beneficiary/Derivative, Respondent)
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 1.6 (P) Create Part 3 client information model
+- [x] 1.6 (P) Create Part 3 client information model
   - Capture client name fields (family name, given name, middle name)
   - Include entity information (entity name, signatory title)
   - Include USCIS Online Account Number and Alien Registration Number
@@ -45,21 +45,21 @@
   - Embed address model for client mailing address
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
 
-- [ ] 1.7 (P) Create Parts 4-5 consent and signatures model
+- [x] 1.7 (P) Create Parts 4-5 consent and signatures model
   - Capture notice delivery preference checkboxes
   - Include signature presence detection fields for client and attorney (boolean)
   - Include signature date fields normalized to ISO 8601 format
   - Include law student/graduate signature date
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
 
-- [ ] 1.8 (P) Create Part 6 additional information model
+- [x] 1.8 (P) Create Part 6 additional information model
   - Capture name fields for Part 6 identification
   - Define an entry structure with page number, part number, item number, and content
   - Support a list of additional information entries
   - Return empty collection when Part 6 is absent
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 1.9 Create the aggregate G28FormData model
+- [x] 1.9 Create the aggregate G28FormData model
   - Combine all part models into a single aggregate root
   - Include metadata fields (source file, form detected flag, extraction timestamp, overall confidence)
   - Include validation result lists (missing sections, uncertain fields, validation warnings)
@@ -68,7 +68,7 @@
   - Use consistent field naming matching form identifiers
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 1.10 Create the extraction result wrapper model
+- [x] 1.10 Create the extraction result wrapper model
   - Wrap extraction outcome with success/failure status
   - Include data field for G28FormData on success
   - Include error message and error code on failure

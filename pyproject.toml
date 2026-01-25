@@ -20,6 +20,8 @@ dependencies = [
     "passporteye>=2.2.2",
     "mrz>=0.6.2",
     "rich>=13.0.0",
+    "pydantic>=2.12.5",
+    "pyyaml>=6.0.3",
 ]
 
 [project.scripts]
