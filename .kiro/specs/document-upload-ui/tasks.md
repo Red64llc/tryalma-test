@@ -8,15 +8,15 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
 
 ## Tasks
 
-- [ ] 1. Flask Application Foundation
-- [ ] 1.1 (P) Create Flask application factory with configuration and CSRF protection
+- [x] 1. Flask Application Foundation
+- [x] 1.1 (P) Create Flask application factory with configuration and CSRF protection
   - Set up Flask app factory following steering patterns (development, testing, production configs)
   - Configure CSRF protection via Flask-WTF
   - Set maximum upload file size to 10MB
   - Register error handlers for common HTTP errors
   - _Requirements: 7.1_
 
-- [ ] 1.2 (P) Define WebApp exception hierarchy for HTTP error responses
+- [x] 1.2 (P) Define WebApp exception hierarchy for HTTP error responses
   - Create base WebAppError with status_code and error_code attributes
   - Implement FileValidationError, UnsupportedFormatError, FileTooLargeError
   - Implement DocumentTypeRequiredError and ExtractionFailedError
