@@ -1264,6 +1264,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/80/68/4ca73cbc32d18a938627945701463c1311091103647be1b43d63af9fb574/passporteye-2.2.2.tar.gz", hash = "sha256:319dd6dd20f0f26b883ad3a9111358895bb8b7f08ccdbe7378475750b0dc6caa", size = 28030 }
 
 [[package]]
+name = "pdf2image"
+version = "1.17.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pillow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/00/d8/b280f01045555dc257b8153c00dee3bc75830f91a744cd5f84ef3a0a64b1/pdf2image-1.17.0.tar.gz", hash = "sha256:eaa959bc116b420dd7ec415fcae49b98100dda3dd18cd2fdfa86d09f112f6d57", size = 12811 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/62/33/61766ae033518957f877ab246f87ca30a85b778ebaad65b7f74fa7e52988/pdf2image-1.17.0-py3-none-any.whl", hash = "sha256:ecdd58d7afb810dffe21ef2b1bbc057ef434dabbac6c33778a38a3f7744a27e2", size = 11618 },
+]
+
+[[package]]
 name = "pdfminer"
 version = "20191125"
 source = { registry = "https://pypi.org/simple" }
@@ -2112,6 +2124,7 @@ dependencies = [
     { name = "mrz" },
     { name = "opencv-python" },
     { name = "passporteye" },
+    { name = "pdf2image" },
     { name = "pillow" },
     { name = "pydantic" },
     { name = "pyyaml" },
@@ -2136,6 +2149,7 @@ requires-dist = [
     { name = "mrz", specifier = ">=0.6.2" },
     { name = "opencv-python", specifier = ">=4.13.0.90" },
     { name = "passporteye", specifier = ">=2.2.2" },
+    { name = "pdf2image", specifier = ">=1.17.0" },
     { name = "pillow", specifier = ">=12.1.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pyyaml", specifier = ">=6.0.3" },

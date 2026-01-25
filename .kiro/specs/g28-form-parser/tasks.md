@@ -90,7 +90,7 @@
 
 ## Task 3: Document Loading
 
-- [ ] 3.1 Implement document format validation
+- [x] 3.1 Implement document format validation
   - Define supported formats constant (PDF, PNG, JPG, JPEG, TIFF)
   - Validate file extension against supported formats
   - Validate using magic bytes for security, not just extension
@@ -98,7 +98,7 @@
   - Support validation from both file path and filename string (for web uploads)
   - _Requirements: 1.3_
 
-- [ ] 3.2 Implement PDF to image conversion
+- [x] 3.2 Implement PDF to image conversion
   - Convert PDF pages to PIL Image objects using pdf2image
   - Enforce maximum page limit (4 pages for standard G-28)
   - Handle multi-page PDF documents
@@ -106,14 +106,14 @@
   - Raise DocumentLoadError on conversion failure
   - _Requirements: 1.1, 1.5_
 
-- [ ] 3.3 Implement image file loading
+- [x] 3.3 Implement image file loading
   - Load PNG, JPG, JPEG, TIFF images using Pillow
   - Normalize images to RGB mode
   - Handle image format variations gracefully
   - Raise appropriate error for corrupted or unreadable files
   - _Requirements: 1.2, 1.4_
 
-- [ ] 3.4 Assemble DocumentLoader service
+- [x] 3.4 Assemble DocumentLoader service
   - Implement load() method accepting file path and returning list of images
   - Implement load_bytes() method accepting raw bytes and filename for Flask integration
   - Check file existence before processing for path-based loading
@@ -281,7 +281,7 @@
 
 ## Task 10: Unit Test Coverage
 
-- [ ] 10.1 (P) Implement DocumentLoader unit tests
+- [x] 10.1 (P) Implement DocumentLoader unit tests
   - Test PDF format validation
   - Test image format validation
   - Test unsupported format rejection
