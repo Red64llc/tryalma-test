@@ -3,12 +3,16 @@
 import typer
 
 from tryalma.core import get_greeting
+from tryalma.passport.cli import app as passport_app
 
 app = typer.Typer(
     name="tryalma",
     help="TryAlma CLI - A sample CLI and API application.",
     add_completion=False,
 )
+
+# Register passport sub-command
+app.add_typer(passport_app, name="passport")
 
 
 @app.command()
