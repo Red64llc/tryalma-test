@@ -62,8 +62,8 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Handle validation failures gracefully and include warnings in result
   - _Requirements: 6.2, 6.3, 6.4_
 
-- [ ] 5. Implement passport extraction service
-- [ ] 5.1 Implement single image extraction workflow
+- [x] 5. Implement passport extraction service
+- [x] 5.1 Implement single image extraction workflow
   - Create PassportExtractionService class with dependency injection for extractor and validator
   - Implement extract_single method that orchestrates extraction and validation
   - Convert RawMRZData to PassportData with proper date parsing (YYMMDD to date objects)
@@ -71,7 +71,7 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Ensure user-friendly error messages without exposing internals
   - _Requirements: 1.1, 5.1, 5.2_
 
-- [ ] 5.2 Implement batch directory processing
+- [x] 5.2 Implement batch directory processing
   - Implement extract_batch method that processes all images in a directory
   - Scan directory for supported image formats using is_supported_format
   - Implement get_supported_extensions method
