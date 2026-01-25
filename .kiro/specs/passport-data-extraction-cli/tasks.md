@@ -79,8 +79,8 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Continue processing on individual file errors and collect all results
   - _Requirements: 1.2, 1.4, 5.1_
 
-- [ ] 6. Implement output formatting
-- [ ] 6.1 (P) Implement table output formatter
+- [x] 6. Implement output formatting
+- [x] 6.1 (P) Implement table output formatter
   - Create OutputFormatter class with format method dispatching to specific formatters
   - Implement format_table method using Rich library for human-readable display
   - Support single and batch result display with clear separation between records
@@ -88,7 +88,7 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Handle empty results gracefully
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 4.1_
 
-- [ ] 6.2 (P) Implement JSON and CSV output formatters
+- [x] 6.2 (P) Implement JSON and CSV output formatters
   - Implement format_json method producing valid JSON with results array and summary
   - Implement format_csv method with proper headers and row formatting
   - Include unavailable_fields in JSON output

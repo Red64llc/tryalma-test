@@ -13,8 +13,7 @@ from tryalma.passport.exceptions import (
     UnsupportedFormatError,
 )
 from tryalma.passport.extractor import MRZExtractor
-from tryalma.passport.service import PassportExtractionService
-from tryalma.passport.validator import MRZValidator
+from tryalma.passport.formatter import OutputFormat, OutputFormatter
 from tryalma.passport.models import (
     CheckDigitResult,
     ExtractionResult,
@@ -23,6 +22,8 @@ from tryalma.passport.models import (
     RawMRZData,
     ValidationResult,
 )
+from tryalma.passport.service import PassportExtractionService
+from tryalma.passport.validator import MRZValidator
 
 __all__ = [
     # Models
@@ -38,6 +39,9 @@ __all__ = [
     "PassportExtractionService",
     # Validator
     "MRZValidator",
+    # Formatter
+    "OutputFormat",
+    "OutputFormatter",
     # Exceptions
     "PassportExtractionError",
     "MRZNotFoundError",
