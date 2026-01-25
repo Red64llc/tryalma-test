@@ -169,7 +169,7 @@
 
 ## Task 6: Output Formatting
 
-- [ ] 6. Implement OutputFormatter for JSON and YAML
+- [x] 6. Implement OutputFormatter for JSON and YAML
   - Format G28FormData to JSON string with proper indentation
   - Format G28FormData to YAML string using PyYAML
   - Support verbose mode that includes confidence scores and metadata
@@ -311,7 +311,7 @@
   - Test schema validation of API response
   - _Requirements: 8.6, 10.1, 10.2_
 
-- [ ] 10.5 (P) Implement OutputFormatter tests
+- [x] 10.5 (P) Implement OutputFormatter tests
   - Test JSON output formatting
   - Test YAML output formatting
   - Test verbose vs non-verbose output differences
