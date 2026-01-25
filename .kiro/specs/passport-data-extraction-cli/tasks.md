@@ -52,8 +52,8 @@ This implementation plan covers the passport data extraction CLI feature, which 
   - Provide macOS (brew), Linux (apt), and Windows installation guidance
   - _Requirements: 5.3_
 
-- [ ] 4. Implement MRZ validation layer
-- [ ] 4.1 Implement MRZ validator with ICAO 9303 compliance
+- [x] 4. Implement MRZ validation layer
+- [x] 4.1 Implement MRZ validator with ICAO 9303 compliance
   - Create MRZValidator class using mrz library checkers
   - Implement validate method that auto-detects MRZ type and validates check digits
   - Implement validate_td1 method for ID card format (3 lines, 30 chars each)
