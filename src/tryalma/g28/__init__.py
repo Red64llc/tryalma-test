@@ -25,6 +25,7 @@ from tryalma.g28.models import (
     G28FormData,
     NoticeOfAppearance,
 )
+from tryalma.g28.field_extractor import FieldExtractor
 from tryalma.g28.vision_extractor import VisionExtractor
 
 __all__ = [
@@ -49,4 +50,5 @@ __all__ = [
     "G28ExtractionResult",
     # Extractors
     "VisionExtractor",
+    "FieldExtractor",
 ]

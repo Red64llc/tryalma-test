@@ -146,20 +146,20 @@
 
 ## Task 5: Field Extraction Coordinator
 
-- [ ] 5.1 Implement FieldExtractor with backend injection
+- [x] 5.1 Implement FieldExtractor with backend injection
   - Accept primary extraction backend via constructor
   - Optionally accept fallback extraction backend
   - Fall back to secondary extractor only on primary failure
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-- [ ] 5.2 Implement main extraction method
+- [x] 5.2 Implement main extraction method
   - Accept list of page images
   - Delegate to extraction backend with G28FormData schema
   - Detect if document is not a G-28 form and raise NotG28FormError
   - Return fully populated G28FormData with confidence scores
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 7.1, 7.2, 7.3, 10.1_
 
-- [ ] 5.3 Implement field normalization and validation
+- [x] 5.3 Implement field normalization and validation
   - Normalize date fields to ISO 8601 format (YYYY-MM-DD)
   - Represent checkbox fields as boolean values
   - Validate email format and flag invalid values
