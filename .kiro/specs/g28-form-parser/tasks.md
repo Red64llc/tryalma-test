@@ -78,7 +78,7 @@
 
 ## Task 2: Exception Hierarchy
 
-- [ ] 2. Create G28-specific exception classes
+- [x] 2. Create G28-specific exception classes
   - Define G28ExtractionError as base exception extending ProcessingError with exit code 3
   - Create NotG28FormError for document type mismatch detection
   - Create DocumentLoadError for file loading failures
@@ -298,7 +298,7 @@
   - Test optional field handling (null representation)
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-- [ ] 10.3 (P) Implement exception hierarchy tests
+- [x] 10.3 (P) Implement exception hierarchy tests
   - Test each exception type has correct exit code
   - Test exception messages are descriptive
   - Test exception inheritance chain
