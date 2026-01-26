@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from flask import Blueprint, jsonify, render_template_string, request
+from flask import Blueprint, jsonify, render_template, request
 
 from tryalma.webapp.exceptions import (
     DocumentTypeRequiredError,
@@ -29,46 +29,6 @@ if TYPE_CHECKING:
 
 # Create blueprint
 upload_bp = Blueprint("upload", __name__)
-
-
-# Simple upload page template (will be replaced with full template in Task 5)
-UPLOAD_PAGE_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Upload</title>
-    <style>
-        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .upload-form { border: 2px dashed #ccc; padding: 40px; text-align: center; margin: 20px 0; }
-        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
-        .btn:hover { background: #0056b3; }
-        select, input[type="file"] { margin: 10px 0; padding: 10px; }
-    </style>
-</head>
-<body>
-    <h1>Document Upload</h1>
-    <form id="upload-form" class="upload-form" method="POST" action="/upload" enctype="multipart/form-data">
-        <div>
-            <label for="document_type">Document Type:</label>
-            <select name="document_type" id="document_type" required>
-                <option value="">Select document type...</option>
-                <option value="passport">Passport</option>
-                <option value="g28">G-28 Form</option>
-            </select>
-        </div>
-        <div>
-            <label for="file">Select File:</label>
-            <input type="file" name="file" id="file" accept=".pdf,.jpg,.jpeg,.png" required>
-        </div>
-        <p>Supported formats: PDF, JPEG, PNG (max 10MB)</p>
-        <button type="submit" class="btn">Upload</button>
-    </form>
-    <div id="results"></div>
-</body>
-</html>
-"""
 
 
 def get_upload_service():
@@ -109,12 +69,12 @@ def get_upload_service():
 def index() -> str:
     """Serve the main upload page.
 
-    GET / - Returns HTML upload page.
+    GET / - Returns HTML upload page with drag-and-drop upload zone.
 
     Returns:
-        HTML page with upload form
+        HTML page with upload form and document type selector
     """
-    return render_template_string(UPLOAD_PAGE_TEMPLATE)
+    return render_template("upload.html")
 
 
 @upload_bp.route("/upload", methods=["POST"])

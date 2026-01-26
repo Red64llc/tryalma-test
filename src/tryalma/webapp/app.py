@@ -4,9 +4,14 @@ Creates and configures the Flask application with blueprints,
 CSRF protection, and error handlers.
 """
 
+from pathlib import Path
+
 from flask import Flask, jsonify, render_template_string, request
 
 from tryalma.webapp.config import config
+
+# Get the path to this module's directory for templates and static files
+_MODULE_DIR = Path(__file__).parent
 
 
 def create_app(config_name: str = "default") -> Flask:
@@ -27,7 +32,11 @@ def create_app(config_name: str = "default") -> Flask:
         app = create_app("production")
         app.run()
     """
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        template_folder=str(_MODULE_DIR / "templates"),
+        static_folder=str(_MODULE_DIR / "static"),
+    )
 
     # Load configuration
     config_class = config.get(config_name, config["default"])

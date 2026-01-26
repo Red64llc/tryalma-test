@@ -79,15 +79,15 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
   - Include CSRF token for AJAX requests
   - _Requirements: 7.1, 7.2_
 
-- [ ] 6. Upload Interface Components
-- [ ] 6.1 Create upload page template with document type selector and upload zone
+- [x] 6. Upload Interface Components
+- [x] 6.1 Create upload page template with document type selector and upload zone
   - Implement drag-and-drop upload area using HTML5 drag events
   - Add document type selector with passport and G-28 options
   - Display loading indicator during file upload and processing
   - Show supported file formats guidance
   - _Requirements: 1.1, 1.4, 1.5, 2.1, 7.3, 7.4_
 
-- [ ] 6.2 Implement upload zone JavaScript for AJAX file handling
+- [x] 6.2 Implement upload zone JavaScript for AJAX file handling
   - Handle drag-and-drop events with visual feedback
   - Perform client-side file type validation before upload
   - Submit files via AJAX with progress indication
