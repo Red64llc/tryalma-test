@@ -7,6 +7,7 @@ from tryalma.form_populator.exceptions import (
     BrowserError,
     PageNavigationError,
 )
+from tryalma.form_populator.browser_controller import BrowserController
 
 __all__ = [
     "FormPopulationError",
@@ -14,4 +15,5 @@ __all__ = [
     "FormNotFoundError",
     "BrowserError",
     "PageNavigationError",
+    "BrowserController",
 ]
