@@ -248,6 +248,10 @@ def populate_form() -> tuple["Response", int]:
     try:
         from tryalma.form_populator.service import FormPopulationService, PopulationConfig
 
+        # Debug: Log received data
+        print(f"[DEBUG] Received extracted_data keys: {list(extracted_data.keys())}")
+        print(f"[DEBUG] Received extracted_data: {extracted_data}")
+
         # Create service with headed mode so user can see the automation
         # Use non-headless for development/demo, headless for production
         config = PopulationConfig(

@@ -69,21 +69,22 @@ class FieldMapping:
 FORM_FIELD_MAPPINGS: list[FieldMapping] = [
     # Part 1: Attorney/Representative Information
     # Keys match webapp's FieldMapper output (attorney_surname, attorney_given_names, etc.)
+    # Selectors match actual form at https://mendrika-alma.github.io/form-submission/
     FieldMapping(
         "attorney_surname",  # From webapp extraction: attorney_surname
-        "input[name='familyName']",
+        "input[name='family-name']",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
         "attorney_given_names",  # From webapp extraction: attorney_given_names
-        "input[name='givenName']",
+        "input[name='given-name']",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
         "attorney_phone",  # From webapp extraction: attorney_phone
-        "input[name='daytimePhone']",
+        "input[name='daytime-phone']",
         FieldType.TEXT,
         format_pattern="###-###-####",
     ),
@@ -98,44 +99,44 @@ FORM_FIELD_MAPPINGS: list[FieldMapping] = [
     # Keys match webapp's FieldMapper output
     FieldMapping(
         "applicant_surname",  # From webapp: applicant_surname
-        "input[name='lastName']",
+        "input[name='passport-surname']",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
         "applicant_given_names",  # From webapp: applicant_given_names
-        "input[name='firstNames']",
+        "input[name='passport-given-names']",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
         "passport_number",  # From webapp: passport_number
-        "input[name='passportNumber']",
+        "input[name='passport-number']",
         FieldType.TEXT,
     ),
     FieldMapping(
         "nationality",  # From webapp: nationality
-        "input[name='nationality']",
+        "input[name='passport-nationality']",
         FieldType.TEXT,
     ),
     FieldMapping(
         "applicant_dob",  # From webapp: applicant_dob
-        "input[name='dateOfBirth']",
+        "input[name='passport-dob']",
         FieldType.DATE,
     ),
     FieldMapping(
         "applicant_sex",  # From webapp: applicant_sex
-        "input[name='sex']",
-        FieldType.RADIO,
+        "select[name='passport-sex']",
+        FieldType.DROPDOWN,
     ),
     FieldMapping(
         "passport_expiry",  # From webapp: passport_expiry
-        "input[name='dateOfExpiration']",
+        "input[name='passport-expiry-date']",
         FieldType.DATE,
     ),
     FieldMapping(
         "a_number",  # From webapp: a_number (alien registration number)
-        "input[name='alienNumber']",
+        "input[name='alien-number']",
         FieldType.TEXT,
     ),
     # Note: Part 4 consent checkboxes require user confirmation
@@ -144,25 +145,25 @@ FORM_FIELD_MAPPINGS: list[FieldMapping] = [
     # These are marked with is_signature=True and excluded from population
     FieldMapping(
         "client_signature",
-        "input[name='clientSignature']",
+        "input[name='client-signature']",
         FieldType.SIGNATURE,
         is_signature=True,
     ),
     FieldMapping(
         "client_signature_date",
-        "input[name='clientSignatureDate']",
+        "input[name='client-signature-date']",
         FieldType.SIGNATURE,
         is_signature=True,
     ),
     FieldMapping(
         "attorney_signature",
-        "input[name='attorneySignature']",
+        "input[name='attorney-signature']",
         FieldType.SIGNATURE,
         is_signature=True,
     ),
     FieldMapping(
         "attorney_signature_date",
-        "input[name='attorneySignatureDate']",
+        "input[name='attorney-signature-date']",
         FieldType.SIGNATURE,
         is_signature=True,
     ),

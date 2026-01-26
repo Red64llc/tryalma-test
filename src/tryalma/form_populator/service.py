@@ -141,7 +141,9 @@ class FormPopulationService:
             with browser.launch():
                 # Navigate to form
                 browser.navigate(form_url)
-                browser.wait_for_form_ready()
+                # Wait for form container or first input to be ready
+                # Some pages use <form>, others use <div class="form-container">
+                browser.wait_for_form_ready(form_selector=".form-container, form, input")
 
                 # Populate fields in order
                 self._populate_fields(browser, extracted_data)
@@ -179,6 +181,10 @@ class FormPopulationService:
         populatable_mappings = self._mapping_config.get_populatable_mappings()
         first_field = True
 
+        # Debug: Log mapping info
+        print(f"[DEBUG] Populatable mappings: {[m.field_id for m in populatable_mappings]}")
+        print(f"[DEBUG] Extracted data keys: {list(extracted_data.keys())}")
+
         for mapping in populatable_mappings:
             # Add delay between fields (skip for first field)
             if not first_field and self._config.inter_field_delay_ms > 0:
@@ -187,6 +193,7 @@ class FormPopulationService:
 
             # Check if we have data for this field
             if mapping.field_id not in extracted_data or extracted_data[mapping.field_id] is None:
+                print(f"[DEBUG] Skipping {mapping.field_id} - no data available")
                 self._reporter.record_skipped(
                     field_id=mapping.field_id,
                     reason="No data available",
@@ -195,16 +202,19 @@ class FormPopulationService:
                 continue
 
             value = extracted_data[mapping.field_id]
+            print(f"[DEBUG] Populating {mapping.field_id} with value '{value}' using selector '{mapping.selector}'")
 
             # Populate based on field type
             try:
                 self._populate_single_field(browser, mapping, value)
+                print(f"[DEBUG] Successfully populated {mapping.field_id}")
                 self._reporter.record_populated(
                     field_id=mapping.field_id,
                     value=str(value),
                     selector=mapping.selector,
                 )
             except Exception as e:
+                print(f"[DEBUG] Failed to populate {mapping.field_id}: {e}")
                 logger.warning(
                     "Failed to populate field %s: %s",
                     mapping.field_id,
@@ -365,12 +375,13 @@ class FormPopulationService:
 
         str_value = str(value)
 
-        # Try to parse and format date to MM/DD/YYYY (US format)
+        # HTML date inputs require ISO format (YYYY-MM-DD)
         if isinstance(value, date_type):
-            str_value = value.strftime("%m/%d/%Y")
-        elif re.match(r"^\d{4}-\d{2}-\d{2}$", str_value):
-            # ISO format - convert to US format
-            parts = str_value.split("-")
-            str_value = f"{parts[1]}/{parts[2]}/{parts[0]}"
+            str_value = value.strftime("%Y-%m-%d")
+        elif re.match(r"^\d{2}/\d{2}/\d{4}$", str_value):
+            # US format (MM/DD/YYYY) - convert to ISO format
+            parts = str_value.split("/")
+            str_value = f"{parts[2]}-{parts[0]}-{parts[1]}"
+        # If already ISO format (YYYY-MM-DD), use as-is
 
         browser.fill(mapping.selector, str_value)

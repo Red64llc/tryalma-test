@@ -222,12 +222,12 @@ class TestFormFieldMappings:
         assert mapping is not None
         assert mapping.field_type == FieldType.DATE
 
-    def test_applicant_sex_is_radio(self):
-        """Should map applicant sex as radio field."""
+    def test_applicant_sex_is_dropdown(self):
+        """Should map applicant sex as dropdown field (select element on form)."""
         mapping = _find_mapping_by_field_id("applicant_sex")
 
         assert mapping is not None
-        assert mapping.field_type == FieldType.RADIO
+        assert mapping.field_type == FieldType.DROPDOWN
 
     def test_passport_expiry_is_date(self):
         """Should map passport expiry as date field."""

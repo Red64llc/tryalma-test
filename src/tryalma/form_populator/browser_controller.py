@@ -180,11 +180,25 @@ class BrowserController:
 
         timeout = timeout_ms if timeout_ms is not None else self.timeout_ms
 
-        try:
-            locator = self._page.locator(form_selector)
-            locator.wait_for(state="visible", timeout=timeout)
-        except Exception:
-            raise FormNotFoundError(missing_elements=[form_selector])
+        # Try multiple selectors if comma-separated
+        selectors = [s.strip() for s in form_selector.split(",")]
+
+        print(f"[DEBUG] Waiting for form ready, trying selectors: {selectors}")
+        print(f"[DEBUG] Current URL: {self._page.url}")
+
+        for selector in selectors:
+            try:
+                print(f"[DEBUG] Trying selector: {selector}")
+                locator = self._page.locator(selector).first
+                locator.wait_for(state="visible", timeout=min(timeout, 10000))
+                print(f"[DEBUG] Found element with selector: {selector}")
+                return  # Found one, we're good
+            except Exception as e:
+                print(f"[DEBUG] Selector {selector} failed: {e}")
+                continue  # Try next selector
+
+        # If none worked, raise error
+        raise FormNotFoundError(missing_elements=[form_selector])
 
     def fill(self, selector: str, value: str) -> None:
         """Fill text input field, clearing existing content first.
@@ -196,7 +210,8 @@ class BrowserController:
         if self._page is None:
             raise BrowserError(operation="fill", reason="Browser not launched")
 
-        locator = self._page.locator(selector)
+        # Use .first to handle cases where selector matches multiple elements
+        locator = self._page.locator(selector).first
         locator.fill(value)
 
     def type_slowly(
@@ -227,7 +242,8 @@ class BrowserController:
         if self._page is None:
             raise BrowserError(operation="check", reason="Browser not launched")
 
-        locator = self._page.locator(selector)
+        # Use .first to handle cases where selector matches multiple elements
+        locator = self._page.locator(selector).first
         locator.check()
 
     def uncheck(self, selector: str) -> None:
@@ -261,7 +277,8 @@ class BrowserController:
         if self._page is None:
             raise BrowserError(operation="select_option", reason="Browser not launched")
 
-        locator = self._page.locator(selector)
+        # Use .first to handle cases where selector matches multiple elements
+        locator = self._page.locator(selector).first
 
         if value is not None:
             locator.select_option(value=value)
@@ -334,7 +351,8 @@ class BrowserController:
         if self._page is None:
             raise BrowserError(operation="get_attribute", reason="Browser not launched")
 
-        locator = self._page.locator(selector)
+        # Use .first to handle cases where selector matches multiple elements
+        locator = self._page.locator(selector).first
         return locator.get_attribute(name)
 
     def capture_screenshot(self, path: Path) -> None:
