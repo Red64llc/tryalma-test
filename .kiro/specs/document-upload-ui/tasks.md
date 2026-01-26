@@ -71,8 +71,8 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
   - Provide retry option for network errors
   - _Requirements: 3.3, 3.4, 4.3, 4.4, 8.1, 8.2_
 
-- [ ] 5. Base Template and Layout
-- [ ] 5.1 (P) Create base Jinja2 template with Bootstrap 5 integration
+- [x] 5. Base Template and Layout
+- [x] 5.1 (P) Create base Jinja2 template with Bootstrap 5 integration
   - Set up page structure with blocks for title, content, and scripts
   - Include Bootstrap 5 via CDN for responsive styling
   - Configure flash message display area
