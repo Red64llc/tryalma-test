@@ -31,20 +31,20 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
   - Return validation results with user-friendly error messages
   - _Requirements: 1.2, 1.3, 1.6_
 
-- [ ] 3. Field Mapping
-- [ ] 3.1 (P) Implement field mapper for passport data
+- [x] 3. Field Mapping
+- [x] 3.1 (P) Implement field mapper for passport data
   - Map PassportExtractionService output fields to form field schema
   - Preserve confidence scores for display purposes
   - Track auto-populated flag for visual distinction
   - _Requirements: 5.1, 5.2_
 
-- [ ] 3.2 (P) Implement field mapper for G-28 form data
+- [x] 3.2 (P) Implement field mapper for G-28 form data
   - Map G28ParserService output fields to form field schema
   - Handle attorney information and applicant information sections
   - Preserve confidence scores and source tracking
   - _Requirements: 5.1, 5.3_
 
-- [ ] 3.3 Implement field merge logic for multiple document uploads
+- [x] 3.3 Implement field merge logic for multiple document uploads
   - Merge new extraction results with existing form data
   - Preserve previously populated fields (no overwriting)
   - Handle conflicts between passport and G-28 data gracefully
