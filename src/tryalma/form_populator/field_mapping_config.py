@@ -68,217 +68,78 @@ class FieldMapping:
 
 FORM_FIELD_MAPPINGS: list[FieldMapping] = [
     # Part 1: Attorney/Representative Information
+    # Keys match webapp's FieldMapper output (attorney_surname, attorney_given_names, etc.)
     FieldMapping(
-        "attorney_online_account",
-        "input[name='onlineAccountNumber']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "attorney_family_name",
+        "attorney_surname",  # From webapp extraction: attorney_surname
         "input[name='familyName']",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
-        "attorney_given_name",
+        "attorney_given_names",  # From webapp extraction: attorney_given_names
         "input[name='givenName']",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
-        "attorney_middle_name",
-        "input[name='middleName']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "attorney_street_address",
-        "input[name='streetAddress']",
-        FieldType.TEXT,
-        required=True,
-    ),
-    FieldMapping(
-        "attorney_apt_ste_flr",
-        "input[name='aptSteFlr']",
-        FieldType.CHECKBOX,
-    ),
-    FieldMapping(
-        "attorney_city",
-        "input[name='city']",
-        FieldType.TEXT,
-        required=True,
-    ),
-    FieldMapping(
-        "attorney_state",
-        "select[name='state']",
-        FieldType.DROPDOWN,
-        required=True,
-    ),
-    FieldMapping(
-        "attorney_zip",
-        "input[name='zipCode']",
-        FieldType.TEXT,
-        required=True,
-    ),
-    FieldMapping(
-        "attorney_country",
-        "input[name='country']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "attorney_daytime_phone",
+        "attorney_phone",  # From webapp extraction: attorney_phone
         "input[name='daytimePhone']",
         FieldType.TEXT,
-        required=True,
         format_pattern="###-###-####",
     ),
     FieldMapping(
-        "attorney_mobile_phone",
-        "input[name='mobilePhone']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "attorney_email",
+        "attorney_email",  # From webapp extraction: attorney_email
         "input[name='email']",
         FieldType.TEXT,
     ),
-    # Part 2: Eligibility Information
+    # Note: Part 2 eligibility fields are not extracted from documents
+    # and are not included in the mapping. They require manual entry.
+    # Part 3: Beneficiary/Applicant Information (from passport and G-28)
+    # Keys match webapp's FieldMapper output
     FieldMapping(
-        "eligibility_is_attorney",
-        "input[name='isAttorney']",
-        FieldType.CHECKBOX,
-    ),
-    FieldMapping(
-        "eligibility_licensing_authority",
-        "input[name='licensingAuthority']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "eligibility_bar_number",
-        "input[name='barNumber']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "eligibility_restriction_status",
-        "input[name='restrictionStatus']",
-        FieldType.RADIO,
-    ),
-    FieldMapping(
-        "eligibility_law_firm",
-        "input[name='lawFirmName']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "eligibility_is_accredited",
-        "input[name='isAccreditedRep']",
-        FieldType.CHECKBOX,
-    ),
-    FieldMapping(
-        "eligibility_org_name",
-        "input[name='organizationName']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "eligibility_accreditation_date",
-        "input[name='accreditationDate']",
-        FieldType.DATE,
-    ),
-    FieldMapping(
-        "eligibility_is_associated",
-        "input[name='isAssociated']",
-        FieldType.CHECKBOX,
-    ),
-    FieldMapping(
-        "eligibility_is_law_student",
-        "input[name='isLawStudent']",
-        FieldType.CHECKBOX,
-    ),
-    FieldMapping(
-        "eligibility_student_name",
-        "input[name='studentName']",
-        FieldType.TEXT,
-    ),
-    # Part 3: Beneficiary/Passport Information
-    FieldMapping(
-        "beneficiary_last_name",
+        "applicant_surname",  # From webapp: applicant_surname
         "input[name='lastName']",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
-        "beneficiary_first_names",
+        "applicant_given_names",  # From webapp: applicant_given_names
         "input[name='firstNames']",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
-        "beneficiary_middle_names",
-        "input[name='middleNames']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "beneficiary_passport_number",
+        "passport_number",  # From webapp: passport_number
         "input[name='passportNumber']",
         FieldType.TEXT,
-        required=True,
     ),
     FieldMapping(
-        "beneficiary_country_of_issue",
-        "input[name='countryOfIssue']",
-        FieldType.TEXT,
-        required=True,
-    ),
-    FieldMapping(
-        "beneficiary_nationality",
+        "nationality",  # From webapp: nationality
         "input[name='nationality']",
         FieldType.TEXT,
-        required=True,
     ),
     FieldMapping(
-        "beneficiary_date_of_birth",
+        "applicant_dob",  # From webapp: applicant_dob
         "input[name='dateOfBirth']",
         FieldType.DATE,
-        required=True,
     ),
     FieldMapping(
-        "beneficiary_place_of_birth",
-        "input[name='placeOfBirth']",
-        FieldType.TEXT,
-        required=True,
-    ),
-    FieldMapping(
-        "beneficiary_sex",
+        "applicant_sex",  # From webapp: applicant_sex
         "input[name='sex']",
         FieldType.RADIO,
-        required=True,
     ),
     FieldMapping(
-        "beneficiary_date_of_issue",
-        "input[name='dateOfIssue']",
-        FieldType.DATE,
-        required=True,
-    ),
-    FieldMapping(
-        "beneficiary_date_of_expiration",
+        "passport_expiry",  # From webapp: passport_expiry
         "input[name='dateOfExpiration']",
         FieldType.DATE,
-        required=True,
-    ),
-    # Part 4: Client Consent (excluding signatures)
-    FieldMapping(
-        "consent_notices_to_attorney",
-        "input[name='noticesToAttorney']",
-        FieldType.CHECKBOX,
     ),
     FieldMapping(
-        "consent_documents_to_attorney",
-        "input[name='documentsToAttorney']",
-        FieldType.CHECKBOX,
+        "a_number",  # From webapp: a_number (alien registration number)
+        "input[name='alienNumber']",
+        FieldType.TEXT,
     ),
-    FieldMapping(
-        "consent_documents_to_client",
-        "input[name='documentsToClient']",
-        FieldType.CHECKBOX,
-    ),
+    # Note: Part 4 consent checkboxes require user confirmation
+    # and are not auto-populated from extraction.
     # EXCLUDED: Signature fields (Requirements 9.1-9.4)
     # These are marked with is_signature=True and excluded from population
     FieldMapping(

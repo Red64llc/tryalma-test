@@ -244,38 +244,30 @@ def populate_form() -> tuple["Response", int]:
             "error_code": "INVALID_URL",
         }), 400
 
-    # Try to get the form population service
+    # Use the FormPopulationService to actually populate the form
     try:
-        from flask import current_app
+        from tryalma.form_populator.service import FormPopulationService, PopulationConfig
 
-        # Check if form populator service is available
-        if "form_populator" in current_app.extensions:
-            populator = current_app.extensions["form_populator"]
-            report = populator.populate(form_url, extracted_data)
-            return jsonify({
-                "success": True,
-                "message": "Form populated successfully",
-                "report": report.to_dict() if hasattr(report, "to_dict") else report,
-            }), 200
-        else:
-            # Service not yet implemented - return placeholder response
-            # This allows UI development to proceed while backend is built
-            return jsonify({
-                "success": True,
-                "message": "Form population service not yet configured (placeholder response)",
-                "report": {
-                    "form_url": form_url,
-                    "summary": {
-                        "populated": len(extracted_data),
-                        "skipped": 0,
-                        "error": 0,
-                        "manual_required": 2,  # Signatures always need manual attention
-                    },
-                    "note": "This is a placeholder. Configure form_populator service for actual population.",
-                },
-            }), 200
+        # Create service with headed mode so user can see the automation
+        # Use non-headless for development/demo, headless for production
+        config = PopulationConfig(
+            headless=False,  # Show browser window for user to see
+            timeout_ms=60000,  # 60 second timeout
+            inter_field_delay_ms=100,  # Small delay between fields
+        )
+
+        service = FormPopulationService(config=config)
+        report = service.populate(form_url, extracted_data)
+
+        return jsonify({
+            "success": report.success,
+            "message": "Form populated successfully" if report.success else "Form population had issues",
+            "report": report.to_dict(),
+        }), 200 if report.success else 422
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "success": False,
             "error": f"Form population failed: {str(e)}",

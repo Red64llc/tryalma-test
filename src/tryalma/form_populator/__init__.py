@@ -18,6 +18,10 @@ from tryalma.form_populator.models import (
     FieldStatus,
     FieldResult,
 )
+from tryalma.form_populator.reporter import (
+    PopulationReport,
+    PopulationReporter,
+)
 from tryalma.form_populator.field_handlers import (
     TextFieldConfig,
     TextFieldHandler,
@@ -27,6 +31,10 @@ from tryalma.form_populator.field_handlers import (
     RadioHandler,
     DateFormat,
     DateFieldHandler,
+)
+from tryalma.form_populator.service import (
+    PopulationConfig,
+    FormPopulationService,
 )
 
 __all__ = [
@@ -46,6 +54,9 @@ __all__ = [
     # Models
     "FieldStatus",
     "FieldResult",
+    # Reporter
+    "PopulationReport",
+    "PopulationReporter",
     # Field Handlers
     "TextFieldConfig",
     "TextFieldHandler",
@@ -55,4 +66,7 @@ __all__ = [
     "RadioHandler",
     "DateFormat",
     "DateFieldHandler",
+    # Service
+    "PopulationConfig",
+    "FormPopulationService",
 ]

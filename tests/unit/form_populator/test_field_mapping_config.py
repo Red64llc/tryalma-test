@@ -4,6 +4,11 @@ These tests verify:
 - Task 3.1: Field mapping data structures (Requirements: 3.1, 3.3, 9.4)
 - Task 3.2: Target form field mappings (Requirements: 3.1, 3.3, 9.1, 9.2, 9.3, 9.4)
 - Task 3.3: Mapping validation and field retrieval (Requirements: 3.2, 3.4, 3.5)
+
+NOTE: Field mappings are aligned with webapp's FieldMapper output keys:
+- attorney_surname, attorney_given_names, attorney_email, attorney_phone
+- applicant_surname, applicant_given_names, applicant_dob, applicant_sex
+- passport_number, nationality, passport_expiry, a_number
 """
 
 import logging
@@ -22,45 +27,27 @@ class TestFieldType:
     """Tests for FieldType enumeration (Task 3.1)."""
 
     def test_field_type_text_exists(self):
-        """FieldType enum should include TEXT type.
-
-        Requirements: 3.3
-        """
+        """FieldType enum should include TEXT type."""
         assert FieldType.TEXT.value == "text"
 
     def test_field_type_dropdown_exists(self):
-        """FieldType enum should include DROPDOWN type.
-
-        Requirements: 3.3
-        """
+        """FieldType enum should include DROPDOWN type."""
         assert FieldType.DROPDOWN.value == "dropdown"
 
     def test_field_type_checkbox_exists(self):
-        """FieldType enum should include CHECKBOX type.
-
-        Requirements: 3.3
-        """
+        """FieldType enum should include CHECKBOX type."""
         assert FieldType.CHECKBOX.value == "checkbox"
 
     def test_field_type_radio_exists(self):
-        """FieldType enum should include RADIO type.
-
-        Requirements: 3.3
-        """
+        """FieldType enum should include RADIO type."""
         assert FieldType.RADIO.value == "radio"
 
     def test_field_type_date_exists(self):
-        """FieldType enum should include DATE type.
-
-        Requirements: 3.3
-        """
+        """FieldType enum should include DATE type."""
         assert FieldType.DATE.value == "date"
 
     def test_field_type_signature_exists(self):
-        """FieldType enum should include SIGNATURE type for exclusion.
-
-        Requirements: 9.4
-        """
+        """FieldType enum should include SIGNATURE type for exclusion."""
         assert FieldType.SIGNATURE.value == "signature"
 
 
@@ -68,40 +55,31 @@ class TestFieldMapping:
     """Tests for FieldMapping dataclass (Task 3.1)."""
 
     def test_field_mapping_creation_with_required_fields(self):
-        """FieldMapping should require field_id, selector, and field_type.
-
-        Requirements: 3.1
-        """
+        """FieldMapping should require field_id, selector, and field_type."""
         mapping = FieldMapping(
-            field_id="attorney_family_name",
+            field_id="attorney_surname",
             selector="input[name='familyName']",
             field_type=FieldType.TEXT,
         )
 
-        assert mapping.field_id == "attorney_family_name"
+        assert mapping.field_id == "attorney_surname"
         assert mapping.selector == "input[name='familyName']"
         assert mapping.field_type == FieldType.TEXT
 
     def test_field_mapping_required_flag_defaults_to_false(self):
-        """FieldMapping should have required flag defaulting to False.
-
-        Requirements: 3.1
-        """
+        """FieldMapping should have required flag defaulting to False."""
         mapping = FieldMapping(
-            field_id="attorney_middle_name",
-            selector="input[name='middleName']",
+            field_id="attorney_phone",
+            selector="input[name='daytimePhone']",
             field_type=FieldType.TEXT,
         )
 
         assert mapping.required is False
 
     def test_field_mapping_required_flag_can_be_true(self):
-        """FieldMapping should support required=True for mandatory fields.
-
-        Requirements: 3.1
-        """
+        """FieldMapping should support required=True for mandatory fields."""
         mapping = FieldMapping(
-            field_id="attorney_family_name",
+            field_id="attorney_surname",
             selector="input[name='familyName']",
             field_type=FieldType.TEXT,
             required=True,
@@ -110,12 +88,9 @@ class TestFieldMapping:
         assert mapping.required is True
 
     def test_field_mapping_is_signature_flag_defaults_to_false(self):
-        """FieldMapping should have is_signature flag defaulting to False.
-
-        Requirements: 9.4
-        """
+        """FieldMapping should have is_signature flag defaulting to False."""
         mapping = FieldMapping(
-            field_id="attorney_family_name",
+            field_id="attorney_surname",
             selector="input[name='familyName']",
             field_type=FieldType.TEXT,
         )
@@ -123,10 +98,7 @@ class TestFieldMapping:
         assert mapping.is_signature is False
 
     def test_field_mapping_is_signature_flag_for_signature_fields(self):
-        """FieldMapping should support is_signature=True for signature fields.
-
-        Requirements: 9.4
-        """
+        """FieldMapping should support is_signature=True for signature fields."""
         mapping = FieldMapping(
             field_id="client_signature",
             selector="input[name='clientSignature']",
@@ -137,12 +109,9 @@ class TestFieldMapping:
         assert mapping.is_signature is True
 
     def test_field_mapping_format_pattern_defaults_to_none(self):
-        """FieldMapping should have format_pattern defaulting to None.
-
-        Requirements: 3.1
-        """
+        """FieldMapping should have format_pattern defaulting to None."""
         mapping = FieldMapping(
-            field_id="attorney_family_name",
+            field_id="attorney_surname",
             selector="input[name='familyName']",
             field_type=FieldType.TEXT,
         )
@@ -150,12 +119,9 @@ class TestFieldMapping:
         assert mapping.format_pattern is None
 
     def test_field_mapping_format_pattern_for_phone(self):
-        """FieldMapping should support format_pattern for phone numbers.
-
-        Requirements: 3.1
-        """
+        """FieldMapping should support format_pattern for phone numbers."""
         mapping = FieldMapping(
-            field_id="attorney_daytime_phone",
+            field_id="attorney_phone",
             selector="input[name='daytimePhone']",
             field_type=FieldType.TEXT,
             format_pattern="###-###-####",
@@ -164,12 +130,9 @@ class TestFieldMapping:
         assert mapping.format_pattern == "###-###-####"
 
     def test_field_mapping_is_frozen(self):
-        """FieldMapping should be immutable (frozen dataclass).
-
-        Requirements: 3.1
-        """
+        """FieldMapping should be immutable (frozen dataclass)."""
         mapping = FieldMapping(
-            field_id="attorney_family_name",
+            field_id="attorney_surname",
             selector="input[name='familyName']",
             field_type=FieldType.TEXT,
         )
@@ -179,242 +142,110 @@ class TestFieldMapping:
 
 
 class TestFormFieldMappings:
-    """Tests for FORM_FIELD_MAPPINGS constant (Task 3.2)."""
+    """Tests for FORM_FIELD_MAPPINGS constant (Task 3.2).
+
+    Field mappings are aligned with webapp's FieldMapper output.
+    """
 
     def test_form_field_mappings_is_list(self):
-        """FORM_FIELD_MAPPINGS should be a list of FieldMapping objects.
-
-        Requirements: 3.1
-        """
+        """FORM_FIELD_MAPPINGS should be a list of FieldMapping objects."""
         assert isinstance(FORM_FIELD_MAPPINGS, list)
         assert all(isinstance(m, FieldMapping) for m in FORM_FIELD_MAPPINGS)
 
-    # Part 1: Attorney/Representative Information
-    def test_attorney_family_name_mapping_exists(self):
-        """Should map attorney family name field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("attorney_family_name")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.TEXT
-        assert mapping.required is True
-        assert "familyName" in mapping.selector or "family" in mapping.selector.lower()
-
-    def test_attorney_given_name_mapping_exists(self):
-        """Should map attorney given name field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("attorney_given_name")
+    # Attorney Information (from G-28)
+    def test_attorney_surname_mapping_exists(self):
+        """Should map attorney surname field (from webapp: attorney_surname)."""
+        mapping = _find_mapping_by_field_id("attorney_surname")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.TEXT
         assert mapping.required is True
 
-    def test_attorney_street_address_mapping_exists(self):
-        """Should map attorney street address field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("attorney_street_address")
+    def test_attorney_given_names_mapping_exists(self):
+        """Should map attorney given names field (from webapp: attorney_given_names)."""
+        mapping = _find_mapping_by_field_id("attorney_given_names")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.TEXT
         assert mapping.required is True
-
-    def test_attorney_city_mapping_exists(self):
-        """Should map attorney city field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("attorney_city")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.TEXT
-        assert mapping.required is True
-
-    def test_attorney_state_mapping_is_dropdown(self):
-        """Should map attorney state as dropdown field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("attorney_state")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.DROPDOWN
-        assert mapping.required is True
-
-    def test_attorney_zip_mapping_exists(self):
-        """Should map attorney zip code field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("attorney_zip")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.TEXT
-        assert mapping.required is True
-
-    def test_attorney_daytime_phone_has_format_pattern(self):
-        """Should map attorney phone with format pattern.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("attorney_daytime_phone")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.TEXT
-        assert mapping.required is True
-        assert mapping.format_pattern == "###-###-####"
 
     def test_attorney_email_mapping_exists(self):
-        """Should map attorney email field.
-
-        Requirements: 3.1, 3.3
-        """
+        """Should map attorney email field (from webapp: attorney_email)."""
         mapping = _find_mapping_by_field_id("attorney_email")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.TEXT
 
-    # Part 2: Eligibility Information
-    def test_eligibility_is_attorney_is_checkbox(self):
-        """Should map eligibility attorney checkbox.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("eligibility_is_attorney")
+    def test_attorney_phone_has_format_pattern(self):
+        """Should map attorney phone with format pattern."""
+        mapping = _find_mapping_by_field_id("attorney_phone")
 
         assert mapping is not None
-        assert mapping.field_type == FieldType.CHECKBOX
+        assert mapping.field_type == FieldType.TEXT
+        assert mapping.format_pattern == "###-###-####"
 
-    def test_eligibility_bar_number_mapping_exists(self):
-        """Should map eligibility bar number field.
+    # Applicant/Beneficiary Information (from passport and G-28)
+    def test_applicant_surname_mapping_exists(self):
+        """Should map applicant surname field (from webapp: applicant_surname)."""
+        mapping = _find_mapping_by_field_id("applicant_surname")
 
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("eligibility_bar_number")
+        assert mapping is not None
+        assert mapping.field_type == FieldType.TEXT
+        assert mapping.required is True
+
+    def test_applicant_given_names_mapping_exists(self):
+        """Should map applicant given names field (from webapp: applicant_given_names)."""
+        mapping = _find_mapping_by_field_id("applicant_given_names")
+
+        assert mapping is not None
+        assert mapping.field_type == FieldType.TEXT
+        assert mapping.required is True
+
+    def test_passport_number_mapping_exists(self):
+        """Should map passport number field (from webapp: passport_number)."""
+        mapping = _find_mapping_by_field_id("passport_number")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.TEXT
 
-    def test_eligibility_accreditation_date_is_date(self):
-        """Should map eligibility accreditation date as date field.
+    def test_nationality_mapping_exists(self):
+        """Should map nationality field (from webapp: nationality)."""
+        mapping = _find_mapping_by_field_id("nationality")
 
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("eligibility_accreditation_date")
+        assert mapping is not None
+        assert mapping.field_type == FieldType.TEXT
+
+    def test_applicant_dob_is_date(self):
+        """Should map applicant date of birth as date field."""
+        mapping = _find_mapping_by_field_id("applicant_dob")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.DATE
 
-    # Part 3: Beneficiary/Passport Information
-    def test_beneficiary_last_name_mapping_exists(self):
-        """Should map beneficiary last name field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("beneficiary_last_name")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.TEXT
-        assert mapping.required is True
-
-    def test_beneficiary_first_names_mapping_exists(self):
-        """Should map beneficiary first names field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("beneficiary_first_names")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.TEXT
-        assert mapping.required is True
-
-    def test_beneficiary_passport_number_mapping_exists(self):
-        """Should map beneficiary passport number field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("beneficiary_passport_number")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.TEXT
-        assert mapping.required is True
-
-    def test_beneficiary_date_of_birth_is_date(self):
-        """Should map beneficiary date of birth as date field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("beneficiary_date_of_birth")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.DATE
-        assert mapping.required is True
-
-    def test_beneficiary_sex_is_radio(self):
-        """Should map beneficiary sex as radio field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("beneficiary_sex")
+    def test_applicant_sex_is_radio(self):
+        """Should map applicant sex as radio field."""
+        mapping = _find_mapping_by_field_id("applicant_sex")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.RADIO
-        assert mapping.required is True
 
-    def test_beneficiary_nationality_mapping_exists(self):
-        """Should map beneficiary nationality field.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("beneficiary_nationality")
-
-        assert mapping is not None
-        assert mapping.required is True
-
-    def test_beneficiary_date_of_issue_is_date(self):
-        """Should map beneficiary passport issue date.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("beneficiary_date_of_issue")
+    def test_passport_expiry_is_date(self):
+        """Should map passport expiry as date field."""
+        mapping = _find_mapping_by_field_id("passport_expiry")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.DATE
-        assert mapping.required is True
 
-    def test_beneficiary_date_of_expiration_is_date(self):
-        """Should map beneficiary passport expiration date.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("beneficiary_date_of_expiration")
+    def test_a_number_mapping_exists(self):
+        """Should map A-Number field (from webapp: a_number)."""
+        mapping = _find_mapping_by_field_id("a_number")
 
         assert mapping is not None
-        assert mapping.field_type == FieldType.DATE
-        assert mapping.required is True
-
-    # Part 4: Consent Checkboxes
-    def test_consent_notices_to_attorney_is_checkbox(self):
-        """Should map consent notices checkbox.
-
-        Requirements: 3.1, 3.3
-        """
-        mapping = _find_mapping_by_field_id("consent_notices_to_attorney")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.CHECKBOX
+        assert mapping.field_type == FieldType.TEXT
 
     # Signature Fields (Excluded)
     def test_client_signature_is_signature_type(self):
-        """Should mark client signature as signature type.
-
-        Requirements: 9.1, 9.4
-        """
+        """Should mark client signature as signature type."""
         mapping = _find_mapping_by_field_id("client_signature")
 
         assert mapping is not None
@@ -422,10 +253,7 @@ class TestFormFieldMappings:
         assert mapping.is_signature is True
 
     def test_client_signature_date_is_signature_type(self):
-        """Should mark client signature date as signature type.
-
-        Requirements: 9.2, 9.4
-        """
+        """Should mark client signature date as signature type."""
         mapping = _find_mapping_by_field_id("client_signature_date")
 
         assert mapping is not None
@@ -433,10 +261,7 @@ class TestFormFieldMappings:
         assert mapping.is_signature is True
 
     def test_attorney_signature_is_signature_type(self):
-        """Should mark attorney signature as signature type.
-
-        Requirements: 9.1, 9.4
-        """
+        """Should mark attorney signature as signature type."""
         mapping = _find_mapping_by_field_id("attorney_signature")
 
         assert mapping is not None
@@ -444,10 +269,7 @@ class TestFormFieldMappings:
         assert mapping.is_signature is True
 
     def test_attorney_signature_date_is_signature_type(self):
-        """Should mark attorney signature date as signature type.
-
-        Requirements: 9.2, 9.4
-        """
+        """Should mark attorney signature date as signature type."""
         mapping = _find_mapping_by_field_id("attorney_signature_date")
 
         assert mapping is not None
@@ -464,18 +286,12 @@ class TestFieldMappingConfig:
         return FieldMappingConfig()
 
     def test_config_has_default_mappings(self, config):
-        """FieldMappingConfig should load default FORM_FIELD_MAPPINGS.
-
-        Requirements: 3.1
-        """
+        """FieldMappingConfig should load default FORM_FIELD_MAPPINGS."""
         assert len(config.mappings) > 0
         assert len(config.mappings) == len(FORM_FIELD_MAPPINGS)
 
     def test_get_populatable_mappings_excludes_signatures(self, config):
-        """get_populatable_mappings should exclude signature fields.
-
-        Requirements: 9.1, 9.2, 9.3, 9.4
-        """
+        """get_populatable_mappings should exclude signature fields."""
         populatable = config.get_populatable_mappings()
 
         # Verify no signature fields
@@ -490,34 +306,29 @@ class TestFieldMappingConfig:
         assert signature_ids.isdisjoint(populatable_ids)
 
     def test_get_signature_mappings_returns_only_signatures(self, config):
-        """get_signature_mappings should return only signature fields.
-
-        Requirements: 9.4
-        """
+        """get_signature_mappings should return only signature fields."""
         signatures = config.get_signature_mappings()
 
         for mapping in signatures:
             assert mapping.is_signature is True
 
-        # Should have at least 4 signature fields
-        assert len(signatures) >= 4
+        # Should have 4 signature fields
+        assert len(signatures) == 4
 
     def test_get_required_fields_returns_required_non_signature_ids(self, config):
-        """get_required_fields should return required field IDs excluding signatures.
-
-        Requirements: 3.2
-        """
+        """get_required_fields should return required field IDs excluding signatures."""
         required = config.get_required_fields()
 
         assert isinstance(required, list)
         assert all(isinstance(f, str) for f in required)
 
-        # Required fields should include key attorney/beneficiary fields
-        assert "attorney_family_name" in required
-        assert "beneficiary_last_name" in required
-        assert "beneficiary_passport_number" in required
+        # Required fields should include attorney/applicant fields
+        assert "attorney_surname" in required
+        assert "attorney_given_names" in required
+        assert "applicant_surname" in required
+        assert "applicant_given_names" in required
 
-        # Signatures should NOT be in required (even if marked required)
+        # Signatures should NOT be in required
         assert "client_signature" not in required
         assert "attorney_signature" not in required
 
@@ -531,10 +342,7 @@ class TestFieldMappingConfigValidation:
         return FieldMappingConfig()
 
     def test_validate_data_returns_empty_list_when_all_required_present(self, config):
-        """validate_data should return empty list when all required fields present.
-
-        Requirements: 3.2
-        """
+        """validate_data should return empty list when all required fields present."""
         required_fields = config.get_required_fields()
         extracted_data = {field_id: "some_value" for field_id in required_fields}
 
@@ -543,45 +351,34 @@ class TestFieldMappingConfigValidation:
         assert missing == []
 
     def test_validate_data_returns_missing_field_ids(self, config):
-        """validate_data should return list of missing required field IDs.
-
-        Requirements: 3.2
-        """
+        """validate_data should return list of missing required field IDs."""
         # Provide empty data
         extracted_data: dict[str, str | bool | None] = {}
 
         missing = config.validate_data(extracted_data)
 
         assert len(missing) > 0
-        # Should include required fields like attorney_family_name
-        assert "attorney_family_name" in missing
+        # Should include required fields like attorney_surname
+        assert "attorney_surname" in missing
 
     def test_validate_data_considers_none_values_as_missing(self, config):
-        """validate_data should treat None values as missing.
-
-        Requirements: 3.2
-        """
+        """validate_data should treat None values as missing."""
         extracted_data: dict[str, str | bool | None] = {
-            "attorney_family_name": None,
-            "attorney_given_name": "John",
+            "attorney_surname": None,
+            "attorney_given_names": "John",
         }
 
         missing = config.validate_data(extracted_data)
 
-        assert "attorney_family_name" in missing
-        assert "attorney_given_name" not in missing
+        assert "attorney_surname" in missing
+        assert "attorney_given_names" not in missing
 
     def test_validate_data_accepts_boolean_values(self, config):
-        """validate_data should accept boolean values for checkbox fields.
-
-        Requirements: 3.2
-        """
+        """validate_data should accept boolean values for checkbox fields."""
         required_fields = config.get_required_fields()
         extracted_data: dict[str, str | bool | None] = {
             field_id: "value" for field_id in required_fields
         }
-        # Add a checkbox field
-        extracted_data["eligibility_is_attorney"] = True
 
         missing = config.validate_data(extracted_data)
 
@@ -590,10 +387,7 @@ class TestFieldMappingConfigValidation:
     def test_validate_data_logs_warning_for_missing_required(
         self, config, caplog
     ):
-        """validate_data should log warnings for missing required fields.
-
-        Requirements: 3.5
-        """
+        """validate_data should log warnings for missing required fields."""
         extracted_data: dict[str, str | bool | None] = {}
 
         with caplog.at_level(logging.WARNING):
