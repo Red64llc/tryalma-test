@@ -23,8 +23,8 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
   - Ensure exceptions integrate with existing application exception patterns
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-- [ ] 2. File Validation
-- [ ] 2.1 Implement file validator for uploaded documents
+- [x] 2. File Validation
+- [x] 2.1 Implement file validator for uploaded documents
   - Validate file extensions against allowed list (PDF, JPEG, PNG)
   - Check file content-type using magic bytes to prevent extension spoofing
   - Enforce maximum file size limit
