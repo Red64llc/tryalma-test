@@ -1,9 +1,10 @@
 """Flask application factory.
 
 Creates and configures the Flask application with blueprints,
-CSRF protection, and error handlers.
+CSRF protection, error handlers, and service dependencies.
 """
 
+import os
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template_string, request
@@ -45,6 +46,9 @@ def create_app(config_name: str = "default") -> Flask:
     # Initialize CSRF protection
     _init_csrf(app)
 
+    # Initialize services
+    _init_services(app)
+
     # Register blueprints
     _register_blueprints(app)
 
@@ -64,6 +68,49 @@ def _init_csrf(app: Flask) -> None:
 
     csrf = CSRFProtect()
     csrf.init_app(app)
+
+
+def _init_services(app: Flask) -> None:
+    """Initialize application services.
+
+    Creates and wires up the upload service with its dependencies:
+    - PassportExtractionService for passport document extraction
+    - G28ParserService for G-28 form extraction
+    - FileValidator for upload validation
+    - FieldMapper for result transformation
+
+    Args:
+        app: Flask application instance
+    """
+    from tryalma.g28.parser_service import G28ParserService
+    from tryalma.passport.extractor import MRZExtractor
+    from tryalma.passport.service import PassportExtractionService
+    from tryalma.passport.validator import MRZValidator
+    from tryalma.webapp.field_mapper import FieldMapper
+    from tryalma.webapp.upload_service import UploadService
+    from tryalma.webapp.validators import FileValidator
+
+    # Create passport extraction service
+    extractor = MRZExtractor()
+    validator = MRZValidator()
+    passport_service = PassportExtractionService(extractor, validator)
+
+    # Create G28 parser service (uses API key from environment)
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    g28_service = G28ParserService.create_default(api_key=api_key)
+
+    # Create upload service with all dependencies
+    upload_service = UploadService(
+        passport_service=passport_service,
+        g28_service=g28_service,
+        file_validator=FileValidator(),
+        field_mapper=FieldMapper(),
+    )
+
+    # Register in app extensions for route access
+    if not hasattr(app, "extensions"):
+        app.extensions = {}
+    app.extensions["upload_service"] = upload_service
 
 
 def _register_blueprints(app: Flask) -> None:
