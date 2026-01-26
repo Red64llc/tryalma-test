@@ -51,6 +51,12 @@
     let currentFile = null;
     let isUploading = false;
 
+    // Accumulated extraction results (persisted across uploads)
+    let extractedData = {
+        passport: null,
+        g28: null
+    };
+
     /**
      * Initialize all DOM element references.
      */
@@ -379,8 +385,14 @@
         // Display warnings if any
         displayWarnings(data.warnings || []);
 
-        // Display extracted fields
-        displayExtractedFields(data.extracted_fields || {}, data.document_type);
+        // Store extracted data by document type (accumulate, don't replace)
+        const docType = data.document_type;
+        if (docType === 'passport' || docType === 'g28') {
+            extractedData[docType] = data.extracted_fields || {};
+        }
+
+        // Display all accumulated extracted fields
+        displayAllExtractedFields();
 
         // Show results area, hide no-results placeholder
         if (noResults) {
@@ -498,21 +510,43 @@
     }
 
     /**
-     * Display extracted fields in the results area.
+     * Display all accumulated extracted fields (both passport and G-28).
+     */
+    function displayAllExtractedFields() {
+        if (!extractedFields) return;
+
+        // Clear display
+        extractedFields.innerHTML = '';
+
+        // Display passport data if available
+        if (extractedData.passport && Object.keys(extractedData.passport).length > 0) {
+            displayExtractedFieldsSection(extractedData.passport, 'passport');
+        }
+
+        // Display G-28 data if available
+        if (extractedData.g28 && Object.keys(extractedData.g28).length > 0) {
+            displayExtractedFieldsSection(extractedData.g28, 'g28');
+        }
+    }
+
+    /**
+     * Display extracted fields for a single document type section.
      * @param {Object} fields - Extracted fields object
      * @param {string} documentType - Type of document
      */
-    function displayExtractedFields(fields, documentType) {
+    function displayExtractedFieldsSection(fields, documentType) {
         if (!extractedFields) return;
 
-        // Clear previous results
-        extractedFields.innerHTML = '';
+        // Create section container
+        const section = document.createElement('div');
+        section.className = 'mb-4';
+        section.id = 'section-' + documentType;
 
         // Create header
         const header = document.createElement('h6');
         header.className = 'text-muted mb-3';
         header.textContent = documentType === 'passport' ? 'Passport Data' : 'G-28 Form Data';
-        extractedFields.appendChild(header);
+        section.appendChild(header);
 
         // Create table for fields
         const table = document.createElement('table');
@@ -562,7 +596,8 @@
         }
 
         table.appendChild(tbody);
-        extractedFields.appendChild(table);
+        section.appendChild(table);
+        extractedFields.appendChild(section);
     }
 
     /**
@@ -589,6 +624,12 @@
      * Clear all results from the display.
      */
     function clearResults() {
+        // Clear accumulated data
+        extractedData = {
+            passport: null,
+            g28: null
+        };
+
         // Hide results content
         if (resultsContent) {
             resultsContent.classList.add('d-none');

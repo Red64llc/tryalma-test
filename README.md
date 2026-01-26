@@ -1,6 +1,6 @@
 # TryAlma
 
-A Python CLI and REST API application.
+A Python application for extracting data from passport images and G-28 immigration forms. Includes CLI tools, REST API, and a web-based document upload interface.
 
 ## Requirements
 
@@ -12,11 +12,12 @@ A Python CLI and REST API application.
 ```bash
 # Install dependencies
 uv sync
+
+# Install Playwright browsers (for form population feature)
+uv run playwright install chromium
 ```
 
 ## Environment Variables
-
-The application requires the following environment variables:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
@@ -38,31 +39,45 @@ ANTHROPIC_API_KEY="your-api-key" uv run flask --app tryalma.webapp.app:create_ap
 
 ## CLI Usage
 
+### Passport Extraction
+
+Extract passport data from images using MRZ (Machine Readable Zone) OCR:
+
+```bash
+# Extract from a single passport image
+uv run tryalma passport extract path/to/passport.jpg
+
+# Extract from all images in a directory
+uv run tryalma passport extract path/to/images/
+
+# Output as JSON
+uv run tryalma passport extract path/to/passport.jpg --format json
+
+# Output as CSV
+uv run tryalma passport extract path/to/images/ --format csv
+```
+
+### G-28 Form Parsing
+
+Parse USCIS Form G-28 (Notice of Entry of Appearance) documents:
+
+```bash
+# Parse a G-28 form
+uv run tryalma parse-g28 path/to/g28.pdf
+
+# Parse with JSON output
+uv run tryalma parse-g28 path/to/g28.pdf --format json
+```
+
+### General Commands
+
 ```bash
 # Show help
 uv run tryalma --help
 
-# Greet with default name
-uv run tryalma hello
-
-# Greet with custom name
-uv run tryalma hello --name "Alice"
-
 # Show version
 uv run tryalma version
 ```
-
-## API Usage
-
-```bash
-# Start the development server
-uv run uvicorn tryalma.main:app --reload
-
-# Health check
-curl http://localhost:8000/api/v1/health
-```
-
-API documentation available at `http://localhost:8000/docs` when server is running.
 
 ## Web App Usage
 
@@ -85,6 +100,18 @@ uv run flask --app 'tryalma.webapp.app:create_app("production")' run
 ```
 
 The web app will be available at `http://localhost:5000` by default.
+
+## API Usage
+
+```bash
+# Start the development server
+uv run uvicorn tryalma.main:app --reload
+
+# Health check
+curl http://localhost:8000/api/v1/health
+```
+
+API documentation available at `http://localhost:8000/docs` when server is running.
 
 ## Datasets
 

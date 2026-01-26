@@ -2,14 +2,14 @@
 
 ## Tasks
 
-- [ ] 1. Project Setup and Exception Hierarchy
-- [ ] 1.1 Add Playwright dependency and configure browser binaries
+- [x] 1. Project Setup and Exception Hierarchy
+- [x] 1.1 Add Playwright dependency and configure browser binaries
   - Add playwright >= 1.49.0 to project dependencies using uv
   - Configure playwright install chromium command for browser binary setup
   - Verify Playwright sync API is available and functional
   - _Requirements: 1.1_
 
-- [ ] 1.2 (P) Create form population exception hierarchy
+- [x] 1.2 (P) Create form population exception hierarchy
   - Implement base FormPopulationError extending existing ProcessingError
   - Create NavigationError with url and reason attributes for navigation failures
   - Create FormNotFoundError with missing_elements list for form detection failures
