@@ -95,9 +95,8 @@ def _init_services(app: Flask) -> None:
     validator = MRZValidator()
     passport_service = PassportExtractionService(extractor, validator)
 
-    # Create G28 parser service (uses API key from environment)
-    api_key = os.environ.get("GOOGLE_API_KEY")
-    g28_service = G28ParserService.create_default(api_key=api_key)
+    # Create G28 parser service (uses ANTHROPIC_API_KEY from environment)
+    g28_service = G28ParserService.create_default()
 
     # Create upload service with all dependencies
     upload_service = UploadService(
