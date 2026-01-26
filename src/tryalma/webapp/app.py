@@ -36,6 +36,9 @@ def create_app(config_name: str = "default") -> Flask:
     # Initialize CSRF protection
     _init_csrf(app)
 
+    # Register blueprints
+    _register_blueprints(app)
+
     # Register error handlers
     _register_error_handlers(app)
 
@@ -52,6 +55,17 @@ def _init_csrf(app: Flask) -> None:
 
     csrf = CSRFProtect()
     csrf.init_app(app)
+
+
+def _register_blueprints(app: Flask) -> None:
+    """Register application blueprints.
+
+    Args:
+        app: Flask application instance
+    """
+    from tryalma.webapp.routes import upload_bp
+
+    app.register_blueprint(upload_bp)
 
 
 def _register_error_handlers(app: Flask) -> None:

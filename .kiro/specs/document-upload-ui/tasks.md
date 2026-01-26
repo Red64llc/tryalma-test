@@ -50,22 +50,22 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
   - Handle conflicts between passport and G-28 data gracefully
   - _Requirements: 5.4_
 
-- [ ] 4. Upload Service and Routes
-- [ ] 4.1 Implement upload service for document processing orchestration
+- [x] 4. Upload Service and Routes
+- [x] 4.1 Implement upload service for document processing orchestration
   - Accept file uploads and route to appropriate extraction service based on document type
   - Integrate with PassportExtractionService for passport documents
   - Integrate with G28ParserService for G-28 documents
   - Handle extraction results and transform to unified response format
   - _Requirements: 3.1, 3.2, 4.1, 4.2_
 
-- [ ] 4.2 Create upload blueprint with HTTP routes
+- [x] 4.2 Create upload blueprint with HTTP routes
   - Implement GET / to serve the main upload page
   - Implement POST /upload to handle file submissions and return JSON responses
   - Implement POST /clear to reset form state
   - Validate document type is selected before processing
   - _Requirements: 1.1, 1.4, 2.1, 2.2, 2.3_
 
-- [ ] 4.3 Implement extraction error handling and partial success responses
+- [x] 4.3 Implement extraction error handling and partial success responses
   - Catch and transform extraction service errors to user-friendly messages
   - Support partial extraction scenarios (some fields succeed, others fail)
   - Provide retry option for network errors
