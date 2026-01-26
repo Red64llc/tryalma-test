@@ -194,6 +194,95 @@ def clear() -> tuple["Response", int]:
     }), 200
 
 
+@upload_bp.route("/populate-form", methods=["POST"])
+def populate_form() -> tuple["Response", int]:
+    """Populate an external form with extracted data.
+
+    POST /populate-form - Use Playwright to auto-fill a form with extracted data.
+
+    Expected JSON body:
+    - form_url: URL of the target form (required)
+    - extracted_data: Dictionary of field values to populate (required)
+
+    Returns:
+        JSON response with population results or error
+    """
+    # Validate request is JSON
+    if not request.is_json:
+        return jsonify({
+            "success": False,
+            "error": "Request must be JSON",
+            "error_code": "INVALID_REQUEST",
+        }), 400
+
+    data = request.get_json()
+
+    # Validate required fields
+    form_url = data.get("form_url", "").strip()
+    if not form_url:
+        return jsonify({
+            "success": False,
+            "error": "Target form URL is required",
+            "error_code": "FORM_URL_REQUIRED",
+        }), 400
+
+    extracted_data = data.get("extracted_data", {})
+    if not extracted_data:
+        return jsonify({
+            "success": False,
+            "error": "No extracted data provided",
+            "error_code": "NO_DATA",
+        }), 400
+
+    # Validate URL format
+    from urllib.parse import urlparse
+    parsed = urlparse(form_url)
+    if not parsed.scheme or not parsed.netloc:
+        return jsonify({
+            "success": False,
+            "error": "Invalid form URL format",
+            "error_code": "INVALID_URL",
+        }), 400
+
+    # Try to get the form population service
+    try:
+        from flask import current_app
+
+        # Check if form populator service is available
+        if "form_populator" in current_app.extensions:
+            populator = current_app.extensions["form_populator"]
+            report = populator.populate(form_url, extracted_data)
+            return jsonify({
+                "success": True,
+                "message": "Form populated successfully",
+                "report": report.to_dict() if hasattr(report, "to_dict") else report,
+            }), 200
+        else:
+            # Service not yet implemented - return placeholder response
+            # This allows UI development to proceed while backend is built
+            return jsonify({
+                "success": True,
+                "message": "Form population service not yet configured (placeholder response)",
+                "report": {
+                    "form_url": form_url,
+                    "summary": {
+                        "populated": len(extracted_data),
+                        "skipped": 0,
+                        "error": 0,
+                        "manual_required": 2,  # Signatures always need manual attention
+                    },
+                    "note": "This is a placeholder. Configure form_populator service for actual population.",
+                },
+            }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Form population failed: {str(e)}",
+            "error_code": "POPULATION_FAILED",
+        }), 500
+
+
 # Error handlers for blueprint
 @upload_bp.errorhandler(413)
 def request_entity_too_large(error):

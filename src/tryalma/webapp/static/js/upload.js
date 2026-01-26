@@ -51,11 +51,56 @@
     let currentFile = null;
     let isUploading = false;
 
+    // Storage key for persisting extracted data across page refreshes
+    const STORAGE_KEY = 'tryalma_extracted_data';
+
     // Accumulated extraction results (persisted across uploads)
-    let extractedData = {
-        passport: null,
-        g28: null
-    };
+    let extractedData = loadExtractedData();
+
+    /**
+     * Load extracted data from sessionStorage.
+     * @returns {Object} Extracted data object with passport and g28 properties
+     */
+    function loadExtractedData() {
+        try {
+            const stored = sessionStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                // Validate structure
+                if (parsed && typeof parsed === 'object') {
+                    return {
+                        passport: parsed.passport || null,
+                        g28: parsed.g28 || null
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load extracted data from storage:', e);
+        }
+        return { passport: null, g28: null };
+    }
+
+    /**
+     * Save extracted data to sessionStorage.
+     */
+    function saveExtractedData() {
+        try {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(extractedData));
+        } catch (e) {
+            console.warn('Failed to save extracted data to storage:', e);
+        }
+    }
+
+    /**
+     * Clear extracted data from sessionStorage.
+     */
+    function clearExtractedDataStorage() {
+        try {
+            sessionStorage.removeItem(STORAGE_KEY);
+        } catch (e) {
+            console.warn('Failed to clear extracted data from storage:', e);
+        }
+    }
 
     /**
      * Initialize all DOM element references.
@@ -389,6 +434,8 @@
         const docType = data.document_type;
         if (docType === 'passport' || docType === 'g28') {
             extractedData[docType] = data.extracted_fields || {};
+            // Persist to sessionStorage for page refresh survival
+            saveExtractedData();
         }
 
         // Display all accumulated extracted fields
@@ -629,6 +676,8 @@
             passport: null,
             g28: null
         };
+        // Clear from sessionStorage
+        clearExtractedDataStorage();
 
         // Hide results content
         if (resultsContent) {
@@ -667,6 +716,222 @@
         });
     }
 
+    // ===========================================
+    // Form Population (Submit to Form) Handlers
+    // ===========================================
+
+    let submitToFormButton;
+    let formUrlModal;
+    let targetFormUrlInput;
+    let confirmSubmitButton;
+    let populationStatus;
+    let populationLoading;
+    let populationSuccess;
+    let populationError;
+    let populationErrorText;
+    let isPopulating = false;
+
+    /**
+     * Initialize form population elements.
+     */
+    function initFormPopulationElements() {
+        submitToFormButton = document.getElementById('submit-to-form-btn');
+        targetFormUrlInput = document.getElementById('target-form-url');
+        confirmSubmitButton = document.getElementById('confirm-submit-btn');
+        populationStatus = document.getElementById('population-status');
+        populationLoading = document.getElementById('population-loading');
+        populationSuccess = document.getElementById('population-success');
+        populationError = document.getElementById('population-error');
+        populationErrorText = document.getElementById('population-error-text');
+
+        // Initialize Bootstrap modal if available
+        const modalEl = document.getElementById('formUrlModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            formUrlModal = new bootstrap.Modal(modalEl);
+        }
+    }
+
+    /**
+     * Initialize form population event listeners.
+     */
+    function initFormPopulationListeners() {
+        if (submitToFormButton) {
+            submitToFormButton.addEventListener('click', handleSubmitToFormClick);
+        }
+
+        if (confirmSubmitButton) {
+            confirmSubmitButton.addEventListener('click', handleConfirmSubmit);
+        }
+
+        // Reset modal state when closed
+        const modalEl = document.getElementById('formUrlModal');
+        if (modalEl) {
+            modalEl.addEventListener('hidden.bs.modal', resetPopulationModal);
+        }
+    }
+
+    /**
+     * Handle "Submit to Form" button click - open modal.
+     * @param {Event} e
+     */
+    function handleSubmitToFormClick(e) {
+        e.preventDefault();
+
+        // Check if there's any extracted data
+        const hasData = (extractedData.passport && Object.keys(extractedData.passport).length > 0) ||
+                       (extractedData.g28 && Object.keys(extractedData.g28).length > 0);
+
+        if (!hasData) {
+            alert('No extracted data available. Please upload a document first.');
+            return;
+        }
+
+        // Open the modal
+        if (formUrlModal) {
+            formUrlModal.show();
+        }
+    }
+
+    /**
+     * Handle confirm submit button click - start form population.
+     * @param {Event} e
+     */
+    async function handleConfirmSubmit(e) {
+        e.preventDefault();
+
+        if (isPopulating) return;
+
+        const formUrl = targetFormUrlInput.value.trim();
+        if (!formUrl) {
+            alert('Please enter a target form URL.');
+            return;
+        }
+
+        // Validate URL format
+        try {
+            new URL(formUrl);
+        } catch {
+            alert('Please enter a valid URL (e.g., https://example.com/form)');
+            return;
+        }
+
+        // Start population
+        await populateForm(formUrl);
+    }
+
+    /**
+     * Populate the target form with extracted data.
+     * @param {string} formUrl - Target form URL
+     */
+    async function populateForm(formUrl) {
+        isPopulating = true;
+        showPopulationLoading();
+
+        try {
+            // Merge extracted data for submission
+            const mergedData = {};
+
+            // Add passport data (extract just values)
+            if (extractedData.passport) {
+                for (const [key, fieldData] of Object.entries(extractedData.passport)) {
+                    const value = typeof fieldData === 'object' ? fieldData.value : fieldData;
+                    if (value) mergedData[key] = value;
+                }
+            }
+
+            // Add G-28 data (extract just values)
+            if (extractedData.g28) {
+                for (const [key, fieldData] of Object.entries(extractedData.g28)) {
+                    const value = typeof fieldData === 'object' ? fieldData.value : fieldData;
+                    if (value) mergedData[key] = value;
+                }
+            }
+
+            const response = await fetch('/populate-form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': window.CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    form_url: formUrl,
+                    extracted_data: mergedData
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                showPopulationSuccess(data);
+            } else {
+                showPopulationError(data.error || 'Form population failed');
+            }
+
+        } catch (error) {
+            console.error('Form population error:', error);
+            showPopulationError('Network error occurred. Please try again.');
+        } finally {
+            isPopulating = false;
+        }
+    }
+
+    /**
+     * Show population loading state.
+     */
+    function showPopulationLoading() {
+        if (populationStatus) populationStatus.classList.remove('d-none');
+        if (populationLoading) populationLoading.classList.remove('d-none');
+        if (populationSuccess) populationSuccess.classList.add('d-none');
+        if (populationError) populationError.classList.add('d-none');
+        if (confirmSubmitButton) confirmSubmitButton.disabled = true;
+    }
+
+    /**
+     * Show population success state.
+     * @param {Object} data - Response data
+     */
+    function showPopulationSuccess(data) {
+        if (populationLoading) populationLoading.classList.add('d-none');
+        if (populationSuccess) {
+            populationSuccess.classList.remove('d-none');
+            // Include summary if available
+            if (data.report && data.report.summary) {
+                const summary = data.report.summary;
+                populationSuccess.innerHTML = `
+                    <strong>Form populated successfully!</strong><br>
+                    <small>
+                        Populated: ${summary.populated || 0} fields |
+                        Skipped: ${summary.skipped || 0} |
+                        Manual: ${summary.manual_required || 0}
+                    </small>
+                `;
+            }
+        }
+        if (confirmSubmitButton) confirmSubmitButton.disabled = false;
+    }
+
+    /**
+     * Show population error state.
+     * @param {string} message - Error message
+     */
+    function showPopulationError(message) {
+        if (populationLoading) populationLoading.classList.add('d-none');
+        if (populationError) populationError.classList.remove('d-none');
+        if (populationErrorText) populationErrorText.textContent = message;
+        if (confirmSubmitButton) confirmSubmitButton.disabled = false;
+    }
+
+    /**
+     * Reset the population modal state.
+     */
+    function resetPopulationModal() {
+        if (populationStatus) populationStatus.classList.add('d-none');
+        if (populationLoading) populationLoading.classList.add('d-none');
+        if (populationSuccess) populationSuccess.classList.add('d-none');
+        if (populationError) populationError.classList.add('d-none');
+        if (confirmSubmitButton) confirmSubmitButton.disabled = false;
+    }
+
     /**
      * Initialize the upload functionality when DOM is ready.
      */
@@ -682,7 +947,40 @@
         initEventListeners();
         updateSubmitButton();
 
+        // Initialize form population feature
+        initFormPopulationElements();
+        initFormPopulationListeners();
+
+        // Restore UI from sessionStorage if data exists
+        restoreFromStorage();
+
         console.log('Upload.js initialized');
+    }
+
+    /**
+     * Restore UI state from sessionStorage if there's persisted data.
+     */
+    function restoreFromStorage() {
+        const hasPassport = extractedData.passport && Object.keys(extractedData.passport).length > 0;
+        const hasG28 = extractedData.g28 && Object.keys(extractedData.g28).length > 0;
+
+        if (hasPassport || hasG28) {
+            // Show success message
+            if (successMessage) {
+                successMessage.classList.remove('d-none');
+            }
+
+            // Display all accumulated extracted fields
+            displayAllExtractedFields();
+
+            // Show results area, hide no-results placeholder
+            if (noResults) {
+                noResults.classList.add('d-none');
+            }
+            if (resultsContent) {
+                resultsContent.classList.remove('d-none');
+            }
+        }
     }
 
     // Initialize when DOM is ready
