@@ -2,7 +2,7 @@
 
 ## Task Overview
 
-This implementation plan covers the Document Upload UI feature - a Flask-based web application for uploading passport and G-28 documents with automatic data extraction and form population.
+This implementation plan covers the Document Upload UI feature - a Flask-based web application for uploading passport and G-28 documents with automatic data extraction and results display with confidence levels.
 
 ---
 
@@ -94,26 +94,18 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
   - Display upload errors and allow retry
   - _Requirements: 1.1, 1.4, 1.6, 8.1_
 
-- [ ] 7. Form Display and Editing
-- [ ] 7.1 Create form panel template for displaying extracted data
-  - Render form fields with labels and pre-populated values
-  - Map all passport fields (name, DOB, passport number, nationality, expiry)
-  - Map all G-28 fields (attorney info, applicant info)
-  - Use Bootstrap form components for consistent styling
-  - _Requirements: 5.1, 5.2, 5.3, 6.1, 7.4_
+- [ ] 7. Results Display
+- [ ] 7.1 Create results panel template for displaying extracted data with confidence
+  - Display extracted field values with labels
+  - Show confidence scores as visual indicators (badges with color coding)
+  - Group fields by document type (passport fields, G-28 fields)
+  - Use Bootstrap components for consistent styling
+  - _Requirements: 5.1, 5.2, 5.3, 6.1, 6.2, 6.3_
 
-- [ ] 7.2 Implement results panel for extraction review
-  - Display extracted fields alongside populated form
-  - Show confidence indicators for auto-populated values
-  - Visually distinguish auto-populated vs manually entered fields
-  - _Requirements: 6.1, 6.3_
-
-- [ ] 7.3 Implement form editing and clear functionality
-  - Enable editing of any pre-populated field
-  - Track user modifications to preserve changes during merge
-  - Implement clear all functionality to reset form state
-  - Highlight validation errors on individual fields
-  - _Requirements: 5.5, 6.2, 6.4, 8.3, 8.4_
+- [ ] 7.2 Implement clear results functionality
+  - Add clear button to reset displayed results
+  - Clear session state and allow new uploads
+  - _Requirements: 5.5, 6.4_
 
 - [ ] 8. Responsive Design and Navigation
 - [ ] 8.1 Implement responsive layout for desktop and tablet
@@ -143,11 +135,11 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
   - Test extraction error handling
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 9.4 Test multi-document upload and merge workflow
+- [ ] 9.4 Test multi-document upload workflow
   - Upload passport, then upload G-28 in same session
-  - Verify form fields merge without overwriting existing values
-  - Confirm user edits are preserved during merge
-  - _Requirements: 1.5, 5.4, 6.2_
+  - Verify results from both documents are displayed
+  - Confirm confidence levels are shown for all fields
+  - _Requirements: 1.5, 5.4_
 
 ---
 
@@ -176,11 +168,11 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
 | 5.2 | 3.1, 7.1 |
 | 5.3 | 3.2, 7.1 |
 | 5.4 | 3.3, 9.4 |
-| 5.5 | 7.3 |
-| 6.1 | 7.1, 7.2 |
-| 6.2 | 7.3, 9.4 |
-| 6.3 | 7.2 |
-| 6.4 | 7.3 |
+| 5.5 | 7.2 |
+| 6.1 | 7.1 |
+| 6.2 | 7.1 |
+| 6.3 | 7.1 |
+| 6.4 | 7.2 |
 | 7.1 | 1.1, 5.1 |
 | 7.2 | 5.1, 8.1 |
 | 7.3 | 6.1 |
@@ -188,5 +180,3 @@ This implementation plan covers the Document Upload UI feature - a Flask-based w
 | 7.5 | 8.1 |
 | 8.1 | 4.3, 6.2 |
 | 8.2 | 1.2, 4.3 |
-| 8.3 | 7.3 |
-| 8.4 | 1.2, 7.3 |

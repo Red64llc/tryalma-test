@@ -12,8 +12,8 @@
 
 - Provide a drag-and-drop file upload interface supporting PDF and image formats (JPEG, PNG)
 - Integrate seamlessly with existing PassportExtractionService and G28ParserService
-- Display extracted data in an editable form for user verification and correction
-- Support uploading multiple document types in a single session with data merging
+- Display extracted data with confidence levels for user review
+- Support uploading multiple document types in a single session
 - Deliver a professional, responsive UI that works on desktop and tablet devices
 
 ### Non-Goals
@@ -63,7 +63,6 @@ graph TB
         UploadZone[Upload Zone Component]
         DocTypeSelector[Document Type Selector]
         ResultsPanel[Results Display Panel]
-        FormPanel[Editable Form Panel]
     end
 
     subgraph External
@@ -182,8 +181,8 @@ stateDiagram-v2
 | 2.1, 2.2, 2.3 | Document type selection | DocTypeSelector, UploadBlueprint | Document type parameter | Upload Flow |
 | 3.1, 3.2, 3.3, 3.4 | Passport extraction integration | UploadBlueprint, PassportExtractionService | extract_single() | Upload Flow |
 | 4.1, 4.2, 4.3, 4.4 | G-28 extraction integration | UploadBlueprint, G28ParserService | parse_bytes() | Upload Flow |
-| 5.1, 5.2, 5.3, 5.4, 5.5 | Form population | FormPanel, FieldMapper | mapExtractedToForm() | Upload Flow |
-| 6.1, 6.2, 6.3, 6.4 | Extraction results review | ResultsPanel, FormPanel | Display interfaces | Upload Flow |
+| 5.1, 5.2, 5.3, 5.4, 5.5 | Extraction results display | ResultsPanel, FieldMapper | mapExtractedToDisplay() | Upload Flow |
+| 6.1, 6.2, 6.3, 6.4 | Confidence level display | ResultsPanel | Display interfaces | Upload Flow |
 | 7.1, 7.2, 7.3, 7.4, 7.5 | Professional UI | Templates, Static assets | CSS/JS | All flows |
 | 8.1, 8.2, 8.3, 8.4 | Error handling | ErrorHandler, Templates | Error display interfaces | Error Flow |
 
@@ -197,7 +196,7 @@ stateDiagram-v2
 | FieldMapper | WebApp | Maps extracted data to form fields | 5.1-5.4 | None | Service |
 | BaseTemplate | Templates | Base Jinja2 template with layout | 7.1-7.5 | Bootstrap (P1) | State |
 | UploadPage | Templates | Main upload interface template | 1-4 | BaseTemplate (P0) | State |
-| FormPanel | Templates/JS | Editable form with extracted data | 5, 6 | Bootstrap (P1) | State |
+| ResultsPanel | Templates/JS | Display extracted data with confidence levels | 5, 6 | Bootstrap (P1) | State |
 | UploadZone | Templates/JS | Drag-drop file upload component | 1.1, 1.4, 1.5 | None | State |
 
 ### WebApp Layer
@@ -630,11 +629,11 @@ interface UploadZoneCallbacks {
 
 ---
 
-#### FormPanel
+#### ResultsPanel
 
 | Field | Detail |
 |-------|--------|
-| Intent | Displays extracted data in editable form fields |
+| Intent | Displays extracted data with confidence levels |
 | Requirements | 5.1-5.5, 6.1-6.4 |
 
 **Contracts**: Service [ ] / API [ ] / Event [ ] / Batch [ ] / State [x]
@@ -642,25 +641,22 @@ interface UploadZoneCallbacks {
 ##### State Management
 
 ```typescript
-interface FormPanelState {
-  fields: Record<string, FormField>;
-  modifiedFields: Set<string>;  // Track user edits
-  validationErrors: Record<string, string>;
+interface ResultsPanelState {
+  fields: Record<string, ExtractedField>;
+  documentType: "passport" | "g28" | null;
 }
 
-interface FormField {
+interface ExtractedField {
   value: string;
   confidence: number | null;
-  source: "passport" | "g28" | "manual";
-  autoPopulated: boolean;
-  modified: boolean;
+  source: "passport" | "g28";
 }
 ```
 
 **Implementation Notes**
 - Integration: Receives field updates via custom events from UploadZone
-- Validation: Bootstrap 5 validation classes for inline feedback
-- Visual distinction: Auto-populated fields show confidence badge; modified fields show edit icon
+- Visual indicators: Confidence displayed as badges with color coding (high/medium/low)
+- Organization: Fields grouped by document type with clear labels
 
 ---
 
@@ -727,16 +723,14 @@ class ExtractionFailedError(WebAppError, ProcessingError):
 - File extensions must match content type (magic byte validation)
 - Maximum file size is 10MB
 - Document type must be selected before upload
-- Merging preserves existing values (no overwrite)
-- User edits take precedence over auto-populated values
+- Results from multiple documents displayed together
 
 ### Logical Data Model
 
 ```mermaid
 erDiagram
     UploadSession ||--o{ UploadResult : contains
-    UploadResult ||--|{ MappedField : produces
-    FormState ||--o{ MappedField : displays
+    UploadResult ||--|{ ExtractedField : produces
 
     UploadSession {
         string session_id
@@ -752,44 +746,28 @@ erDiagram
         list warnings
     }
 
-    MappedField {
+    ExtractedField {
         string field_id
         string value
         float confidence
         string source
-        bool auto_populated
-        bool modified
-    }
-
-    FormState {
-        dict fields
-        set modified_fields
-        dict validation_errors
     }
 ```
 
 **Consistency and Integrity**:
-- All uploads within a session share form state
-- Field modifications tracked for visual distinction
+- All uploads within a session displayed together
 - Confidence scores preserved for quality indication
 
 ### Data Contracts and Integration
 
-**Form Field Schema**:
+**Extracted Field Schema**:
 ```json
 {
-  "applicant_surname": {"type": "string", "max_length": 100},
-  "applicant_given_names": {"type": "string", "max_length": 100},
-  "applicant_dob": {"type": "date", "format": "YYYY-MM-DD"},
-  "applicant_sex": {"type": "enum", "values": ["M", "F"]},
-  "passport_number": {"type": "string", "max_length": 20},
-  "nationality": {"type": "string", "max_length": 3},
-  "passport_expiry": {"type": "date", "format": "YYYY-MM-DD"},
-  "a_number": {"type": "string", "pattern": "^[0-9]{9}$"},
-  "attorney_surname": {"type": "string", "max_length": 100},
-  "attorney_given_names": {"type": "string", "max_length": 100},
-  "attorney_email": {"type": "email"},
-  "attorney_phone": {"type": "phone"}
+  "field_id": {"type": "string", "description": "Unique field identifier"},
+  "label": {"type": "string", "description": "Human-readable field label"},
+  "value": {"type": "string", "description": "Extracted value"},
+  "confidence": {"type": "number", "min": 0, "max": 1, "description": "Extraction confidence score"},
+  "source": {"type": "string", "enum": ["passport", "g28"], "description": "Source document type"}
 }
 ```
 
@@ -838,7 +816,7 @@ All errors return JSON responses for AJAX requests with consistent structure. Us
 ### E2E Tests
 - `test_upload_page.py`: Page loads with all components
 - `test_file_upload_flow.py`: Complete upload cycle with mocked services
-- `test_form_population.py`: Fields populated after extraction
+- `test_results_display.py`: Extracted fields displayed with confidence levels
 - `test_error_display.py`: Error messages shown correctly
 
 ## Security Considerations

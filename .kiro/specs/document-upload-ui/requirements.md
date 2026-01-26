@@ -42,24 +42,24 @@ This document defines the requirements for a Flask-based web application that en
 3. If the G28 Form Extractor Service returns an error, the Upload UI shall display a user-friendly error message
 4. While the G28 Form Extractor Service is processing, the Upload UI shall display a processing status indicator
 
-### Requirement 5: Form Population
-**Objective:** As a user, I want the extracted data to automatically populate a web form, so that I do not need to manually enter the information.
+### Requirement 5: Extraction Results Display
+**Objective:** As a user, I want to see the extracted data with confidence levels, so that I can review the parsing results.
 
 #### Acceptance Criteria
-1. When extraction is complete, the Upload UI shall display a target form with fields pre-populated from extracted data
-2. The Upload UI shall map extracted passport fields (name, date of birth, passport number, nationality, expiration date) to corresponding form fields
-3. The Upload UI shall map extracted G-28 fields (attorney information, applicant information, signatures) to corresponding form fields
-4. When multiple documents are processed, the Upload UI shall merge extracted data into the form without overwriting previously populated fields
-5. The Upload UI shall allow users to manually edit any pre-populated field before submission
+1. When extraction is complete, the Upload UI shall display the extracted field values
+2. The Upload UI shall display extracted passport fields (name, date of birth, passport number, nationality, expiration date) with their confidence scores
+3. The Upload UI shall display extracted G-28 fields (attorney information, applicant information) with their confidence scores
+4. When multiple documents are processed, the Upload UI shall display results from both documents
+5. The Upload UI shall allow users to clear all extracted data and start over
 
-### Requirement 6: Extraction Results Review
-**Objective:** As a user, I want to review the extracted data before form submission, so that I can verify accuracy and make corrections.
+### Requirement 6: Confidence Level Display
+**Objective:** As a user, I want to see confidence levels for each extracted field, so that I can assess the reliability of the extracted data.
 
 #### Acceptance Criteria
-1. The Upload UI shall display extracted data in a clear, organized format alongside the populated form
-2. When a user modifies a pre-populated field, the Upload UI shall retain the user's modification
-3. The Upload UI shall visually distinguish between auto-populated and manually entered values
-4. The Upload UI shall allow users to clear all extracted data and start over
+1. The Upload UI shall display extracted data in a clear, organized format with field labels
+2. The Upload UI shall show confidence scores as visual indicators (e.g., badges, colors) for each field
+3. The Upload UI shall visually distinguish high-confidence values from low-confidence values
+4. The Upload UI shall allow users to clear all results and upload new documents
 
 ### Requirement 7: Professional User Interface
 **Objective:** As a user, I want a professional and clean interface, so that the application is easy to use and trustworthy.
