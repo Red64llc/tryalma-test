@@ -97,36 +97,135 @@ class VisionExtractor:
         Returns:
             Extraction prompt string.
         """
-        # Get schema JSON for reference
-        schema_json = schema.model_json_schema()
-
-        prompt = f"""You are an expert document parser specialized in USCIS Form G-28
+        prompt = """You are an expert document parser specialized in USCIS Form G-28
 (Notice of Entry of Appearance as Attorney or Accredited Representative).
 
-Analyze the provided form image(s) and extract all fields into a structured JSON format.
+Analyze the provided form image(s) and extract ALL fields into a structured JSON format.
 
-IMPORTANT INSTRUCTIONS:
-1. Extract all visible text and form fields accurately
-2. For each extracted field, provide a confidence score (0.0 to 1.0) indicating extraction certainty
-3. If a field is empty, marked N/A, or illegible, set its value to null
-4. For checkbox fields, return boolean values (true/false)
-5. For date fields, use ISO 8601 format (YYYY-MM-DD) when possible
-6. Return ONLY valid JSON, no additional text or explanation
+## FORM FIELD MAPPINGS
 
-The output should match this schema structure:
-{json.dumps(schema_json, indent=2)}
+### Part 1: Attorney or Accredited Representative Information
+- Field 1 "USCIS Online Account Number" -> part1_attorney_info.uscis_online_account_number
+- Field 2.a "Family Name (Last Name)" -> part1_attorney_info.family_name
+- Field 2.b "Given Name (First Name)" -> part1_attorney_info.given_name
+- Field 2.c "Middle Name" -> part1_attorney_info.middle_name
+- Field 3.a "Street Number and Name" -> part1_attorney_info.address.street_number_and_name
+- Field 3.b "Apt. Ste. Flr." -> part1_attorney_info.address.apt_ste_flr
+- Field 3.c "City or Town" -> part1_attorney_info.address.city_or_town
+- Field 3.d "State" -> part1_attorney_info.address.state
+- Field 3.e "ZIP Code" -> part1_attorney_info.address.zip_code
+- Field 3.f "Province" -> part1_attorney_info.address.province
+- Field 3.g "Postal Code" -> part1_attorney_info.address.postal_code
+- Field 3.h "Country" -> part1_attorney_info.address.country
+- Field 4 "Daytime Telephone Number" -> part1_attorney_info.daytime_telephone
+- Field 5 "Mobile Telephone Number" -> part1_attorney_info.mobile_telephone
+- Field 6 "Email Address" -> part1_attorney_info.email_address
+- Field 7 "Fax Number" -> part1_attorney_info.fax_number
 
-For each field that you extract, wrap it in this structure:
-{{"value": <extracted_value>, "confidence": <0.0-1.0>}}
+### Part 2: Eligibility Information
+- Field 1.a checkbox "I am an attorney eligible to practice law..." -> part2_eligibility.is_attorney (boolean)
+- Field "Licensing Authority" (text below 1.a) -> part2_eligibility.licensing_authority
+- Field 1.b "Bar Number" -> part2_eligibility.bar_number
+- Field 1.c checkbox for "am not"/"am" subject to orders -> part2_eligibility.is_subject_to_disciplinary_order (true if "am" is checked, false if "am not" is checked)
+- Field 1.d "Name of Law Firm or Organization" -> part2_eligibility.law_firm_name
+- Field 2.a checkbox "I am an accredited representative..." -> part2_eligibility.is_accredited_representative (boolean)
+- Field 2.b "Name of Recognized Organization" -> part2_eligibility.recognized_organization_name
+- Field 2.c "Date of Accreditation" -> part2_eligibility.accreditation_date (YYYY-MM-DD format)
+- Field 3 checkbox "I am associated with..." -> part2_eligibility.is_associated (boolean)
+- Field 3 text field for associated attorney name -> part2_eligibility.associated_attorney_name
+- Field 4.a checkbox "I am a law student or law graduate..." -> part2_eligibility.is_law_student_or_graduate (boolean)
+- Field 4.b "Name of Law Student or Law Graduate" -> part2_eligibility.law_student_name
 
-Confidence scoring guidelines:
+### Part 3: Notice of Appearance
+- Field 1.a checkbox "U.S. Citizenship and Immigration Services (USCIS)" -> part3_notice_of_appearance.agency_uscis (boolean)
+- Field 1.b "List the form numbers or specific matter..." -> part3_notice_of_appearance.uscis_form_numbers
+- Field 2.a checkbox "U.S. Immigration and Customs Enforcement (ICE)" -> part3_notice_of_appearance.agency_ice (boolean)
+- Field 2.b "List the specific matter..." (ICE) -> part3_notice_of_appearance.ice_matter
+- Field 3.a checkbox "U.S. Customs and Border Protection (CBP)" -> part3_notice_of_appearance.agency_cbp (boolean)
+- Field 3.b "List the specific matter..." (CBP) -> part3_notice_of_appearance.cbp_matter
+- Field 4 "Receipt Number" -> part3_notice_of_appearance.receipt_number
+- Field 5 checkboxes "Applicant/Petitioner/Requestor/Beneficiary/Derivative/Respondent" -> part3_notice_of_appearance.representation_type (one of: "Applicant", "Petitioner", "Requestor", "Beneficiary/Derivative", "Respondent")
+
+### Part 3: Client Information
+- Field 6.a "Family Name (Last Name)" -> part3_client_info.family_name
+- Field 6.b "Given Name (First Name)" -> part3_client_info.given_name
+- Field 6.c "Middle Name" -> part3_client_info.middle_name
+- Field 7.a "Name of Entity" -> part3_client_info.entity_name
+- Field 7.b "Title of Authorized Signatory for Entity" -> part3_client_info.entity_signatory_title
+- Field 8 "Client's USCIS Online Account Number" -> part3_client_info.uscis_online_account_number
+- Field 9 "Client's Alien Registration Number (A-Number)" -> part3_client_info.alien_registration_number
+- Field 10 "Daytime Telephone Number" -> part3_client_info.daytime_telephone
+- Field 11 "Mobile Telephone Number" -> part3_client_info.mobile_telephone
+- Field 12 "Email Address" -> part3_client_info.email_address
+- Field 13.a "Street Number and Name" -> part3_client_info.mailing_address.street_number_and_name
+- Field 13.b "Apt. Ste. Flr." -> part3_client_info.mailing_address.apt_ste_flr
+- Field 13.c "City or Town" -> part3_client_info.mailing_address.city_or_town
+- Field 13.d "State" -> part3_client_info.mailing_address.state
+- Field 13.e "ZIP Code" -> part3_client_info.mailing_address.zip_code
+- Field 13.f "Province" -> part3_client_info.mailing_address.province
+- Field 13.g "Postal Code" -> part3_client_info.mailing_address.postal_code
+- Field 13.h "Country" -> part3_client_info.mailing_address.country
+
+### Part 4: Client's Consent Options (Page 3)
+- Field 1.a checkbox "I request that USCIS send original notices..." -> part4_5_consent_signatures.send_notices_to_attorney (boolean)
+- Field 1.b checkbox "I request that USCIS send any secure identity document..." -> part4_5_consent_signatures.send_secure_documents_to_attorney (boolean)
+- Field 1.c checkbox "I request that USCIS send my notice containing Form I-94..." -> part4_5_consent_signatures.send_i94_to_client (boolean)
+- Field 2.a "Signature of Client..." -> part4_5_consent_signatures.client_signature_present (boolean - true if signed)
+- Field 2.b "Date of Signature" (client) -> part4_5_consent_signatures.client_signature_date (YYYY-MM-DD format)
+
+### Part 5: Attorney/Representative Signatures (Page 3)
+- Field 1.a "Signature of Attorney..." -> part4_5_consent_signatures.attorney_signature_present (boolean - true if signed)
+- Field 1.b "Date of Signature" (attorney) -> part4_5_consent_signatures.attorney_signature_date (YYYY-MM-DD format)
+- Field 2.b "Date of Signature" (law student) -> part4_5_consent_signatures.law_student_signature_date (YYYY-MM-DD format)
+
+### Part 6: Additional Information (Page 4)
+- Field 1.a "Family Name" -> part6_additional_info.family_name
+- Field 1.b "Given Name" -> part6_additional_info.given_name
+- Field 1.c "Middle Name" -> part6_additional_info.middle_name
+- Additional entries (2.a-2.d, 3.a-3.d, etc.) -> part6_additional_info.entries[] with page_number, part_number, item_number, content
+
+## EXTRACTION INSTRUCTIONS
+1. Extract ALL visible text and form fields accurately
+2. For EACH extracted field, provide a confidence score (0.0 to 1.0)
+3. If a field is empty, marked "N/A", blank, or illegible, set its value to null
+4. For checkbox fields, return boolean values (true if checked, false if not checked)
+5. For date fields, use ISO 8601 format (YYYY-MM-DD)
+6. Address fields should be extracted as nested objects
+7. Return ONLY valid JSON, no additional text
+
+## OUTPUT FORMAT
+For most fields, wrap the value in this structure:
+{"value": <extracted_value_or_null>, "confidence": <0.0-1.0>}
+
+IMPORTANT: Address objects are DIFFERENT - they use PLAIN STRING values, NOT wrapped:
+{
+  "street_number_and_name": "545 Bryant Street",
+  "apt_ste_flr": null,
+  "city_or_town": "Palo Alto",
+  "state": "CA",
+  "zip_code": "94301",
+  "province": null,
+  "postal_code": null,
+  "country": "United States of America"
+}
+
+Do NOT wrap address fields in {"value": ..., "confidence": ...} - use plain strings or null directly.
+
+Confidence scoring:
 - 1.0: Perfectly clear and unambiguous
 - 0.8-0.9: Clear with minor artifacts
 - 0.6-0.7: Partially obscured but readable
 - 0.4-0.5: Difficult to read, uncertain
 - Below 0.4: Very uncertain, consider null
 
-Return ONLY the JSON object, starting with {{ and ending with }}."""
+## REQUIRED METADATA FIELDS
+Include these at the root level:
+- source_file: "extraction"
+- form_detected: true (if this is a G-28 form, false otherwise)
+- extraction_timestamp: current ISO timestamp
+- overall_confidence: average confidence of all extracted fields
+
+Return ONLY the JSON object, starting with { and ending with }."""
 
         return prompt
 

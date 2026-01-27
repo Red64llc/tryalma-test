@@ -254,10 +254,12 @@ def populate_form() -> tuple["Response", int]:
 
         # Create service with headed mode so user can see the automation
         # Use non-headless for development/demo, headless for production
+        # Keep browser open so user can review populated form - form is NOT submitted
         config = PopulationConfig(
             headless=False,  # Show browser window for user to see
             timeout_ms=60000,  # 60 second timeout
             inter_field_delay_ms=100,  # Small delay between fields
+            keep_browser_open_seconds=60,  # Keep form open 60s for review - do NOT submit
         )
 
         service = FormPopulationService(config=config)

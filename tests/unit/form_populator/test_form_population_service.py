@@ -41,6 +41,7 @@ class TestPopulationConfig:
         assert config.inter_field_delay_ms == 50
         assert config.retry_count == 3
         assert config.debug_mode is False
+        assert config.keep_browser_open_seconds == 0
 
     def test_custom_config(self):
         """PopulationConfig accepts custom values."""
@@ -50,6 +51,7 @@ class TestPopulationConfig:
             inter_field_delay_ms=100,
             retry_count=5,
             debug_mode=True,
+            keep_browser_open_seconds=30,
         )
 
         assert config.headless is False
@@ -57,6 +59,7 @@ class TestPopulationConfig:
         assert config.inter_field_delay_ms == 100
         assert config.retry_count == 5
         assert config.debug_mode is True
+        assert config.keep_browser_open_seconds == 30
 
 
 class TestFormPopulationServiceCreation:

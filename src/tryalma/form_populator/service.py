@@ -51,6 +51,7 @@ class PopulationConfig:
         inter_field_delay_ms: Delay between field interactions in ms (default 50).
         retry_count: Number of retries for failed operations (default 3).
         debug_mode: Enable debug mode for visual inspection (default False).
+        keep_browser_open_seconds: Seconds to keep browser open after population (0 = close immediately).
     """
 
     headless: bool = True
@@ -58,6 +59,7 @@ class PopulationConfig:
     inter_field_delay_ms: int = 50
     retry_count: int = 3
     debug_mode: bool = False
+    keep_browser_open_seconds: int = 0
 
 
 class FormPopulationService:
@@ -113,8 +115,11 @@ class FormPopulationService:
         2. Navigate to form URL
         3. Wait for form to be ready
         4. Populate fields in order (excluding signatures)
-        5. Close browser
+        5. Keep browser open if configured, otherwise close
         6. Generate and return report
+
+        Note: Form is NEVER submitted - it is left in an editable state
+        for manual review and submission by the user.
 
         Args:
             form_url: Target form URL to populate.
@@ -147,6 +152,14 @@ class FormPopulationService:
 
                 # Populate fields in order
                 self._populate_fields(browser, extracted_data)
+
+                # Keep browser open for manual review if configured
+                # Form is NOT submitted - user must manually review and submit
+                if self._config.keep_browser_open_seconds > 0:
+                    print(f"\n[INFO] Form populated successfully. NOT submitted.")
+                    print(f"[INFO] Browser will stay open for {self._config.keep_browser_open_seconds} seconds for manual review.")
+                    print("[INFO] Please review the populated form. Submit manually if needed.")
+                    time.sleep(self._config.keep_browser_open_seconds)
 
         except Exception as e:
             logger.error("Form population failed: %s", str(e))
