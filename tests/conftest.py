@@ -1,17 +1,19 @@
 """Shared test fixtures."""
 
 import pytest
-from fastapi.testclient import TestClient
+from flask.testing import FlaskClient
 from typer.testing import CliRunner
 
 from tryalma.cli import app as cli_app
-from tryalma.main import app as fastapi_app
+from tryalma.webapp.app import create_app
 
 
 @pytest.fixture
-def client() -> TestClient:
-    """Create a FastAPI test client."""
-    return TestClient(fastapi_app)
+def client() -> FlaskClient:
+    """Create a Flask test client."""
+    app = create_app("testing")
+    app.config["TESTING"] = True
+    return app.test_client()
 
 
 @pytest.fixture

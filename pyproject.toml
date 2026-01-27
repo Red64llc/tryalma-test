@@ -9,8 +9,6 @@ description = "TryAlma CLI and API"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.32.0",
     "typer>=0.15.0",
     "albumentations>=2.0.8",
     "opencv-python>=4.13.0.90",

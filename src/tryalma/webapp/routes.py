@@ -290,3 +290,15 @@ def request_entity_too_large(error):
         "error": "File size exceeds maximum allowed (10MB)",
         "error_code": "FILE_TOO_LARGE",
     }), 413
+
+
+@upload_bp.route("/api/v1/health", methods=["GET"])
+def health_check() -> tuple["Response", int]:
+    """Check the health status of the API.
+
+    GET /api/v1/health - Returns health status.
+
+    Returns:
+        JSON response with status "healthy"
+    """
+    return jsonify({"status": "healthy"}), 200

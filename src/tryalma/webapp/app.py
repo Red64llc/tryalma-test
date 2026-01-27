@@ -46,8 +46,9 @@ def create_app(config_name: str = "default") -> Flask:
     # Initialize CSRF protection
     _init_csrf(app)
 
-    # Initialize services
-    _init_services(app)
+    # Initialize services (skip in testing mode to avoid external dependencies)
+    if not app.config.get("TESTING"):
+        _init_services(app)
 
     # Register blueprints
     _register_blueprints(app)
