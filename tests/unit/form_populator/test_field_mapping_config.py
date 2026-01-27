@@ -176,13 +176,12 @@ class TestFormFieldMappings:
         assert mapping is not None
         assert mapping.field_type == FieldType.TEXT
 
-    def test_attorney_phone_has_format_pattern(self):
-        """Should map attorney phone with format pattern."""
+    def test_attorney_phone_mapping_exists(self):
+        """Should map attorney phone field."""
         mapping = _find_mapping_by_field_id("attorney_phone")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.TEXT
-        assert mapping.format_pattern == "###-###-####"
 
     # Applicant/Beneficiary Information (from passport and G-28)
     def test_applicant_surname_mapping_exists(self):
@@ -236,33 +235,17 @@ class TestFormFieldMappings:
         assert mapping is not None
         assert mapping.field_type == FieldType.DATE
 
-    def test_a_number_mapping_exists(self):
-        """Should map A-Number field (from webapp: a_number)."""
-        mapping = _find_mapping_by_field_id("a_number")
+    def test_bar_number_mapping_exists(self):
+        """Should map Bar Number field (from webapp: bar_number)."""
+        mapping = _find_mapping_by_field_id("bar_number")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.TEXT
 
     # Signature Fields (Excluded)
-    def test_client_signature_is_signature_type(self):
-        """Should mark client signature as signature type."""
-        mapping = _find_mapping_by_field_id("client_signature")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.SIGNATURE
-        assert mapping.is_signature is True
-
     def test_client_signature_date_is_signature_type(self):
         """Should mark client signature date as signature type."""
         mapping = _find_mapping_by_field_id("client_signature_date")
-
-        assert mapping is not None
-        assert mapping.field_type == FieldType.SIGNATURE
-        assert mapping.is_signature is True
-
-    def test_attorney_signature_is_signature_type(self):
-        """Should mark attorney signature as signature type."""
-        mapping = _find_mapping_by_field_id("attorney_signature")
 
         assert mapping is not None
         assert mapping.field_type == FieldType.SIGNATURE
@@ -300,8 +283,7 @@ class TestFieldMappingConfig:
             assert mapping.field_type != FieldType.SIGNATURE
 
         # Verify signature fields are truly excluded
-        signature_ids = {"client_signature", "client_signature_date",
-                        "attorney_signature", "attorney_signature_date"}
+        signature_ids = {"client_signature_date", "attorney_signature_date"}
         populatable_ids = {m.field_id for m in populatable}
         assert signature_ids.isdisjoint(populatable_ids)
 
@@ -312,8 +294,8 @@ class TestFieldMappingConfig:
         for mapping in signatures:
             assert mapping.is_signature is True
 
-        # Should have 4 signature fields
-        assert len(signatures) == 4
+        # Should have 2 signature date fields
+        assert len(signatures) == 2
 
     def test_get_required_fields_returns_required_non_signature_ids(self, config):
         """get_required_fields should return required field IDs excluding signatures."""
@@ -328,9 +310,9 @@ class TestFieldMappingConfig:
         assert "applicant_surname" in required
         assert "applicant_given_names" in required
 
-        # Signatures should NOT be in required
-        assert "client_signature" not in required
-        assert "attorney_signature" not in required
+        # Signature dates should NOT be in required
+        assert "client_signature_date" not in required
+        assert "attorney_signature_date" not in required
 
 
 class TestFieldMappingConfigValidation:

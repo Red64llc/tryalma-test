@@ -80,11 +80,13 @@ class FieldMapper:
     }
 
     # Eligibility information (Part 2)
+    # Note: is_subject_to_disciplinary_order maps to TWO fields:
+    #   - false -> is_not_subject_to_order (check "am not" checkbox)
+    #   - true -> is_subject_to_order (check "am" checkbox)
     G28_ELIGIBILITY_FIELD_MAP: dict[str, str] = {
         "is_attorney": "is_attorney_eligible",
         "licensing_authority": "licensing_authority",
         "bar_number": "bar_number",
-        "is_subject_to_disciplinary_order": "is_subject_to_order",
         "law_firm_name": "law_firm_name",
         "is_accredited_representative": "is_accredited_rep",
         "recognized_organization_name": "recognized_org_name",
@@ -107,27 +109,11 @@ class FieldMapper:
         "representation_type": "representation_type",
     }
 
-    # Client information (Part 3)
+    # Client information (Part 3) - maps to passport/beneficiary section
+    # Note: The online form uses passport fields for beneficiary info
     G28_CLIENT_FIELD_MAP: dict[str, str] = {
         "family_name": "applicant_surname",
         "given_name": "applicant_given_names",
-        "middle_name": "applicant_middle_name",
-        "alien_registration_number": "a_number",
-        "daytime_telephone": "client_phone",
-        "mobile_telephone": "client_mobile_phone",
-        "email_address": "client_email",
-    }
-
-    # Client address (Part 3) - nested in mailing_address object
-    G28_CLIENT_ADDRESS_MAP: dict[str, str] = {
-        "street_number_and_name": "client_street_address",
-        "apt_ste_flr": "client_apartment",
-        "city_or_town": "client_city",
-        "state": "client_state",
-        "zip_code": "client_zip_code",
-        "province": "client_province",
-        "postal_code": "client_postal_code",
-        "country": "client_country",
     }
 
     # Consent options (Part 4)
@@ -220,6 +206,30 @@ class FieldMapper:
                 auto_populated=True,
             )
 
+        # Special handling for is_subject_to_disciplinary_order (maps to two checkboxes)
+        if eligibility_info:
+            subj_value, subj_conf = self._extract_g28_field_value(
+                eligibility_info, "is_subject_to_disciplinary_order"
+            )
+            if subj_value is True:
+                # "am" subject to orders
+                result["is_subject_to_order"] = MappedField(
+                    field_id="is_subject_to_order",
+                    value="true",
+                    confidence=subj_conf,
+                    source="g28",
+                    auto_populated=True,
+                )
+            elif subj_value is False:
+                # "am not" subject to orders
+                result["is_not_subject_to_order"] = MappedField(
+                    field_id="is_not_subject_to_order",
+                    value="true",
+                    confidence=subj_conf,
+                    source="g28",
+                    auto_populated=True,
+                )
+
         # Map notice of appearance (Part 3)
         notice_info = data.part3_notice_of_appearance
         for source_field, target_field in self.G28_NOTICE_FIELD_MAP.items():
@@ -234,7 +244,7 @@ class FieldMapper:
                 auto_populated=True,
             )
 
-        # Map client information (Part 3)
+        # Map client information (Part 3) - only name fields map to passport section
         client_info = data.part3_client_info
         for source_field, target_field in self.G28_CLIENT_FIELD_MAP.items():
             value, confidence = self._extract_g28_field_value(client_info, source_field)
@@ -245,18 +255,6 @@ class FieldMapper:
                 source="g28",
                 auto_populated=True,
             )
-
-        # Map client address (Part 3)
-        if client_info and client_info.mailing_address:
-            for source_field, target_field in self.G28_CLIENT_ADDRESS_MAP.items():
-                value = getattr(client_info.mailing_address, source_field, None)
-                result[target_field] = MappedField(
-                    field_id=target_field,
-                    value=value,
-                    confidence=1.0 if value else None,
-                    source="g28",
-                    auto_populated=True,
-                )
 
         # Map consent options (Part 4)
         consent_info = data.part4_5_consent_signatures

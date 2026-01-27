@@ -69,138 +69,146 @@ class FieldMapping:
 FORM_FIELD_MAPPINGS: list[FieldMapping] = [
     # ==========================================================================
     # Part 1: Attorney/Representative Information
+    # Form: https://mendrika-alma.github.io/form-submission/
     # ==========================================================================
     FieldMapping(
+        "attorney_uscis_account",
+        "#online-account",
+        FieldType.TEXT,
+    ),
+    FieldMapping(
         "attorney_surname",
-        "input[name='family-name']",
+        "#family-name",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
         "attorney_given_names",
-        "input[name='given-name']",
+        "#given-name",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
         "attorney_middle_name",
-        "input[name='middle-name']",
+        "#middle-name",
         FieldType.TEXT,
     ),
     # Attorney Address
     FieldMapping(
         "attorney_street_address",
-        "input[name='street-address']",
+        "#street-number",
         FieldType.TEXT,
     ),
     FieldMapping(
         "attorney_apartment",
-        "input[name='apartment']",
+        "#apt-number",
         FieldType.TEXT,
     ),
     FieldMapping(
         "attorney_city",
-        "input[name='city']",
+        "#city",
         FieldType.TEXT,
     ),
     FieldMapping(
         "attorney_state",
-        "select[name='state']",
+        "#state",
         FieldType.DROPDOWN,
     ),
     FieldMapping(
         "attorney_zip_code",
-        "input[name='zip-code']",
+        "#zip",
         FieldType.TEXT,
     ),
     FieldMapping(
         "attorney_country",
-        "input[name='country']",
+        "#country",
         FieldType.TEXT,
     ),
     # Attorney Contact
     FieldMapping(
         "attorney_phone",
-        "input[name='daytime-phone']",
+        "#daytime-phone",
         FieldType.TEXT,
-        format_pattern="###-###-####",
     ),
     FieldMapping(
         "attorney_mobile_phone",
-        "input[name='mobile-phone']",
+        "#mobile-phone",
         FieldType.TEXT,
     ),
     FieldMapping(
         "attorney_email",
-        "input[name='email']",
+        "#email",
         FieldType.TEXT,
     ),
-    FieldMapping(
-        "attorney_fax",
-        "input[name='fax-number']",
-        FieldType.TEXT,
-    ),
+    # Note: No fax field in the online form
     # ==========================================================================
     # Part 2: Eligibility Information
     # ==========================================================================
     FieldMapping(
         "is_attorney_eligible",
-        "input[name='attorney-eligible']",
+        "#attorney-eligible",
         FieldType.CHECKBOX,
     ),
     FieldMapping(
         "licensing_authority",
-        "input[name='licensing-authority']",
+        "#licensing-authority",
         FieldType.TEXT,
     ),
     FieldMapping(
         "bar_number",
-        "input[name='bar-number']",
+        "#bar-number",
         FieldType.TEXT,
+    ),
+    # For "am not" subject to orders - check #not-subject
+    # For "am" subject to orders - check #am-subject
+    FieldMapping(
+        "is_not_subject_to_order",
+        "#not-subject",
+        FieldType.CHECKBOX,
     ),
     FieldMapping(
         "is_subject_to_order",
-        "input[name='subject-to-order']",
+        "#am-subject",
         FieldType.CHECKBOX,
     ),
     FieldMapping(
         "law_firm_name",
-        "input[name='law-firm-name']",
+        "#law-firm",
         FieldType.TEXT,
     ),
     FieldMapping(
         "is_accredited_rep",
-        "input[name='accredited-rep']",
+        "#accredited-rep",
         FieldType.CHECKBOX,
     ),
     FieldMapping(
         "recognized_org_name",
-        "input[name='organization-name']",
+        "#recognized-org",
         FieldType.TEXT,
     ),
     FieldMapping(
         "accreditation_date",
-        "input[name='accreditation-date']",
+        "#accreditation-date",
         FieldType.DATE,
     ),
     FieldMapping(
         "is_associated_attorney",
-        "input[name='associated-attorney']",
+        "#associated-with",
         FieldType.CHECKBOX,
     ),
     FieldMapping(
         "associated_attorney_name",
-        "input[name='associated-attorney-name']",
+        "#associated-with-name",
         FieldType.TEXT,
     ),
     FieldMapping(
         "is_law_student",
-        "input[name='law-student']",
+        "#law-student",
         FieldType.CHECKBOX,
     ),
     FieldMapping(
         "law_student_name",
-        "input[name='law-student-name']",
+        "#student-name",
         FieldType.TEXT,
     ),
     # ==========================================================================
@@ -208,123 +216,72 @@ FORM_FIELD_MAPPINGS: list[FieldMapping] = [
     # ==========================================================================
     FieldMapping(
         "applicant_surname",
-        "input[name='passport-surname']",
+        "#passport-surname",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
         "applicant_given_names",
-        "input[name='passport-given-names']",
+        "#passport-given-names",
         FieldType.TEXT,
         required=True,
     ),
     FieldMapping(
-        "applicant_middle_name",
-        "input[name='passport-middle-name']",
+        "passport_number",
+        "#passport-number",
         FieldType.TEXT,
     ),
     FieldMapping(
-        "passport_number",
-        "input[name='passport-number']",
+        "passport_country",
+        "#passport-country",
         FieldType.TEXT,
     ),
     FieldMapping(
         "nationality",
-        "input[name='passport-nationality']",
+        "#passport-nationality",
         FieldType.TEXT,
     ),
     FieldMapping(
         "applicant_dob",
-        "input[name='passport-dob']",
+        "#passport-dob",
         FieldType.DATE,
+    ),
+    FieldMapping(
+        "place_of_birth",
+        "#passport-pob",
+        FieldType.TEXT,
     ),
     FieldMapping(
         "applicant_sex",
-        "select[name='passport-sex']",
+        "#passport-sex",
         FieldType.DROPDOWN,
     ),
     FieldMapping(
-        "passport_expiry",
-        "input[name='passport-expiry-date']",
+        "passport_issue_date",
+        "#passport-issue-date",
         FieldType.DATE,
     ),
     FieldMapping(
-        "a_number",
-        "input[name='alien-number']",
-        FieldType.TEXT,
-    ),
-    # Client contact and address (from G-28)
-    FieldMapping(
-        "client_phone",
-        "input[name='client-phone']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_mobile_phone",
-        "input[name='client-mobile-phone']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_email",
-        "input[name='client-email']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_street_address",
-        "input[name='client-street-address']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_apartment",
-        "input[name='client-apartment']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_city",
-        "input[name='client-city']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_state",
-        "select[name='client-state']",
-        FieldType.DROPDOWN,
-    ),
-    FieldMapping(
-        "client_zip_code",
-        "input[name='client-zip-code']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_province",
-        "input[name='client-province']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_postal_code",
-        "input[name='client-postal-code']",
-        FieldType.TEXT,
-    ),
-    FieldMapping(
-        "client_country",
-        "input[name='client-country']",
-        FieldType.TEXT,
+        "passport_expiry",
+        "#passport-expiry-date",
+        FieldType.DATE,
     ),
     # ==========================================================================
     # Part 4: Consent Options
     # ==========================================================================
     FieldMapping(
         "send_notices_to_attorney",
-        "input[name='notices-to-attorney']",
+        "#notices-to-attorney",
         FieldType.CHECKBOX,
     ),
     FieldMapping(
         "send_documents_to_attorney",
-        "input[name='documents-to-attorney']",
+        "#documents-to-attorney",
         FieldType.CHECKBOX,
     ),
     FieldMapping(
         "send_i94_to_client",
-        "input[name='i94-to-client']",
+        "#docs-to-me",
         FieldType.CHECKBOX,
     ),
     # ==========================================================================
@@ -332,26 +289,14 @@ FORM_FIELD_MAPPINGS: list[FieldMapping] = [
     # These are marked with is_signature=True and excluded from population
     # ==========================================================================
     FieldMapping(
-        "client_signature",
-        "input[name='client-signature']",
-        FieldType.SIGNATURE,
-        is_signature=True,
-    ),
-    FieldMapping(
         "client_signature_date",
-        "input[name='client-signature-date']",
-        FieldType.SIGNATURE,
-        is_signature=True,
-    ),
-    FieldMapping(
-        "attorney_signature",
-        "input[name='attorney-signature']",
+        "#client-signature-date",
         FieldType.SIGNATURE,
         is_signature=True,
     ),
     FieldMapping(
         "attorney_signature_date",
-        "input[name='attorney-signature-date']",
+        "#attorney-signature-date",
         FieldType.SIGNATURE,
         is_signature=True,
     ),
