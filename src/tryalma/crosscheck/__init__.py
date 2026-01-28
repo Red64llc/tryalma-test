@@ -20,6 +20,7 @@ from tryalma.crosscheck.models import (
     ProcessingMetadata,
     VisualZoneData,
 )
+from tryalma.crosscheck.qwen2vl_provider import Qwen2VLProvider
 
 __all__ = [
     # Models
@@ -38,4 +39,6 @@ __all__ = [
     "VLMExtractionError",
     "VLMTimeoutError",
     "ConfigurationError",
+    # Providers
+    "Qwen2VLProvider",
 ]
