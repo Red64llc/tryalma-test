@@ -42,7 +42,7 @@ class Qwen2VLProvider:
 
     SUPPORTED_FORMATS: set[str] = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
-    DEFAULT_MODEL: str = "Qwen/Qwen2-VL-7B-Instruct"
+    DEFAULT_MODEL: str = "Qwen/Qwen2.5-VL-7B-Instruct"
 
     EXTRACTION_PROMPT: str = """Extract the following fields from this passport image.
 Return ONLY a JSON object with these exact keys (use null for missing fields):

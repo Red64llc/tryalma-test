@@ -79,6 +79,7 @@ def _init_services(app: Flask) -> None:
     - G28ParserService for G-28 form extraction
     - FileValidator for upload validation
     - FieldMapper for result transformation
+    - CrossCheckService for enhanced passport extraction (when HF_TOKEN is set)
 
     Args:
         app: Flask application instance
@@ -99,18 +100,59 @@ def _init_services(app: Flask) -> None:
     # Create G28 parser service (uses ANTHROPIC_API_KEY from environment)
     g28_service = G28ParserService.create_default()
 
+    # Create crosscheck service if HF_TOKEN is available
+    crosscheck_service = _create_crosscheck_service(extractor, validator)
+
     # Create upload service with all dependencies
     upload_service = UploadService(
         passport_service=passport_service,
         g28_service=g28_service,
         file_validator=FileValidator(),
         field_mapper=FieldMapper(),
+        crosscheck_service=crosscheck_service,
     )
 
     # Register in app extensions for route access
     if not hasattr(app, "extensions"):
         app.extensions = {}
     app.extensions["upload_service"] = upload_service
+
+
+def _create_crosscheck_service(extractor, validator):
+    """Create CrossCheckService if HF_TOKEN is configured.
+
+    The CrossCheckService provides enhanced passport extraction by combining
+    MRZ extraction with Qwen2-VL visual extraction for cross-validation.
+
+    Args:
+        extractor: MRZExtractor instance
+        validator: MRZValidator instance
+
+    Returns:
+        CrossCheckService instance or None if HF_TOKEN not configured
+    """
+    hf_token = os.environ.get("HF_TOKEN")
+    if not hf_token:
+        return None
+
+    try:
+        from tryalma.crosscheck.config import CrossCheckConfig
+        from tryalma.crosscheck.qwen2vl_provider import Qwen2VLProvider
+        from tryalma.crosscheck.service import CrossCheckService
+
+        config = CrossCheckConfig(hf_token=hf_token)
+        vlm_provider = Qwen2VLProvider(hf_token=hf_token)
+
+        return CrossCheckService(
+            mrz_extractor=extractor,
+            mrz_validator=validator,
+            vlm_provider=vlm_provider,
+            config=config,
+        )
+    except Exception as e:
+        # Log but don't fail - fall back to MRZ-only extraction
+        print(f"Warning: Could not initialize CrossCheckService: {e}")
+        return None
 
 
 def _register_blueprints(app: Flask) -> None:

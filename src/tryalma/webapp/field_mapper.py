@@ -154,6 +154,48 @@ class FieldMapper:
 
         return result
 
+    def map_passport_data_with_confidences(
+        self, data: PassportData | None, field_confidences: dict[str, float]
+    ) -> dict[str, MappedField]:
+        """Map PassportData to form fields with per-field confidence scores.
+
+        Used when CrossCheckService provides individual confidence scores for
+        each field based on MRZ/VLM agreement.
+
+        Args:
+            data: Extracted passport data from CrossCheckService
+            field_confidences: Per-field confidence scores from cross-validation
+
+        Returns:
+            Dictionary of field_id -> MappedField with per-field confidences
+        """
+        if data is None:
+            return {}
+
+        result: dict[str, MappedField] = {}
+
+        for source_field, target_field in self.PASSPORT_FIELD_MAP.items():
+            raw_value = getattr(data, source_field)
+
+            # Convert date objects to ISO format strings
+            if isinstance(raw_value, date):
+                value = raw_value.isoformat()
+            else:
+                value = raw_value
+
+            # Use per-field confidence if available, otherwise fall back to document confidence
+            field_confidence = field_confidences.get(source_field, data.confidence)
+
+            result[target_field] = MappedField(
+                field_id=target_field,
+                value=value,
+                confidence=field_confidence,
+                source="passport",
+                auto_populated=True,
+            )
+
+        return result
+
     def map_g28_data(self, data: "G28FormData") -> dict[str, MappedField]:
         """Map G28FormData to form fields.
 

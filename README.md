@@ -7,6 +7,7 @@ Get TryAlma running in minutes and extract data from your first documents.
 - **Python 3.12+**
 - **[uv](https://docs.astral.sh/uv/)** - Fast Python package manager
 - **Anthropic API Key** - Required for G-28 form extraction
+- **Hugging Face Token** (optional) - Required for enhanced passport extraction with VLM cross-validation
 
 ### Installing UV
 
@@ -25,6 +26,18 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 3. Navigate to API Keys and create a new key
 4. Copy the key for the next step
 
+### Getting a Hugging Face Token (Optional)
+
+For enhanced passport extraction with VLM (Qwen2-VL) cross-validation:
+
+1. Go to [huggingface.co](https://huggingface.co)
+2. Sign up or log in
+3. Navigate to Settings → Access Tokens
+4. Create a new token with "Read" permission
+5. Copy the token for the next step
+
+**Note:** Without an HF token, passport extraction will use MRZ-only mode. With an HF token, the app will cross-validate passport data using both MRZ OCR and the Qwen2-VL vision model for higher accuracy and per-field confidence scores.
+
 ## Setup
 
 ### Step 1: Install Dependencies
@@ -41,16 +54,18 @@ Create a `.env` file in the project root:
 cp .env.example .env
 ```
 
-Edit `.env` and add your Anthropic API key:
+Edit `.env` and add your API keys:
 
 ```
-ANTHROPIC_API_KEY=your-api-key-here
+ANTHROPIC_API_KEY=your-anthropic-api-key-here
+HF_TOKEN=your-huggingface-token-here  # Optional: for enhanced passport extraction
 ```
 
-Or export it directly in your terminal:
+Or export them directly in your terminal:
 
 ```bash
-export ANTHROPIC_API_KEY="your-api-key-here"
+export ANTHROPIC_API_KEY="your-anthropic-api-key-here"
+export HF_TOKEN="your-huggingface-token-here"  # Optional
 ```
 
 ### Step 3: Start the App
@@ -124,6 +139,27 @@ uv run tryalma passport extract path/to/images/
 uv run tryalma passport extract path/to/passport.jpg --format json
 ```
 
+### Enhanced Passport Extraction with Cross-Check (Requires HF_TOKEN)
+
+Extract passport data using dual-source cross-validation (MRZ + Qwen2-VL vision model):
+
+```bash
+# Cross-check extraction with per-field confidence scores
+uv run tryalma crosscheck path/to/passport.jpg
+
+# Verbose output with timing metadata
+uv run tryalma crosscheck path/to/passport.jpg --verbose
+
+# Custom timeouts
+uv run tryalma crosscheck path/to/passport.jpg --mrz-timeout 10 --vlm-timeout 30
+```
+
+Cross-check mode provides:
+- **Dual-source validation**: Compares MRZ OCR with VLM visual extraction
+- **Per-field confidence scores**: Higher confidence when sources agree
+- **Discrepancy reporting**: Highlights differences between extraction sources
+- **Fallback handling**: Falls back to single source if one extraction fails
+
 ### G-28 Form Parsing
 
 Parse USCIS Form G-28 documents (requires Anthropic API key):
@@ -148,10 +184,20 @@ uv run tryalma --help
 - Make sure your `ANTHROPIC_API_KEY` environment variable is set
 - Restart the Flask server after setting the variable
 
+**"HF_TOKEN not configured" warning**
+- This is expected if you haven't set up Hugging Face token
+- Passport extraction will work using MRZ-only mode
+- For enhanced cross-check extraction, set the `HF_TOKEN` environment variable
+
 **Extraction failed**
 - Ensure your document is clear and readable
 - G-28 forms should be PDF format
 - Passports work best as high-resolution images
+
+**Cross-check extraction timeout**
+- VLM extraction may be slow on first request (model loading)
+- Increase timeout: `--vlm-timeout 60`
+- Check your internet connection for HF API access
 
 **Port already in use**
 - Run on a different port: `uv run flask --app tryalma.webapp.app:create_app run --port 5001`

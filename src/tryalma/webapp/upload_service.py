@@ -5,7 +5,8 @@ Requirements: 3.1, 3.2, 4.1, 4.2
 
 Accepts file uploads and routes to appropriate extraction service based on
 document type. Integrates with PassportExtractionService for passport documents
-and G28ParserService for G-28 documents.
+and G28ParserService for G-28 documents. Optionally uses CrossCheckService for
+enhanced passport extraction with VLM cross-validation when HF_TOKEN is configured.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from tryalma.webapp.field_mapper import FieldMapper, MappedField
 from tryalma.webapp.validators import FileValidator
 
 if TYPE_CHECKING:
+    from tryalma.crosscheck.service import CrossCheckService
     from tryalma.g28.parser_service import G28ParserService
     from tryalma.passport.service import PassportExtractionService
 
@@ -93,10 +95,11 @@ class UploadService:
     and result transformation into unified response format.
 
     Attributes:
-        _passport_service: Service for passport extraction
+        _passport_service: Service for passport extraction (MRZ-only)
         _g28_service: Service for G-28 form extraction
         _file_validator: Validator for uploaded files
         _field_mapper: Mapper for extraction results to form fields
+        _crosscheck_service: Optional service for enhanced passport extraction with VLM
     """
 
     def __init__(
@@ -105,6 +108,7 @@ class UploadService:
         g28_service: "G28ParserService",
         file_validator: FileValidator,
         field_mapper: FieldMapper,
+        crosscheck_service: "CrossCheckService | None" = None,
     ) -> None:
         """Initialize UploadService with dependencies.
 
@@ -113,11 +117,13 @@ class UploadService:
             g28_service: G28ParserService for G-28 form extraction
             file_validator: FileValidator for file validation
             field_mapper: FieldMapper for result mapping
+            crosscheck_service: Optional CrossCheckService for VLM cross-validation
         """
         self._passport_service = passport_service
         self._g28_service = g28_service
         self._file_validator = file_validator
         self._field_mapper = field_mapper
+        self._crosscheck_service = crosscheck_service
 
     def process_upload(
         self,
@@ -157,7 +163,11 @@ class UploadService:
     def _process_passport(
         self, file_storage: FileStorage, filename: str
     ) -> UploadResult:
-        """Process passport document through PassportExtractionService.
+        """Process passport document through extraction service.
+
+        Uses CrossCheckService when available (HF_TOKEN configured) for enhanced
+        extraction with VLM cross-validation. Falls back to PassportExtractionService
+        for MRZ-only extraction otherwise.
 
         Args:
             file_storage: The uploaded file
@@ -178,51 +188,12 @@ class UploadService:
                 tmp.write(file_storage.stream.read())
                 tmp_path = Path(tmp.name)
 
-            # Extract using passport service
-            result = self._passport_service.extract_single(tmp_path)
+            # Use crosscheck service if available (HF_TOKEN configured)
+            if self._crosscheck_service is not None:
+                return self._process_passport_with_crosscheck(tmp_path, filename)
 
-            if not result.success:
-                return UploadResult(
-                    success=False,
-                    document_type="passport",
-                    source_filename=filename,
-                    form_fields={},
-                    extracted_fields={},
-                    warnings=[],
-                    partially_extracted=[],
-                    error=result.error or "Extraction failed",
-                    error_code="EXTRACTION_FAILED",
-                )
-
-            # Map extracted data to form fields
-            mapped_fields = self._field_mapper.map_passport_data(result.data)
-
-            # Build extracted_fields dictionary
-            extracted_fields = self._build_extracted_fields(mapped_fields)
-
-            # Collect warnings
-            warnings = []
-            if result.data and not result.data.mrz_valid:
-                warnings.append("MRZ validation failed - please verify extracted data")
-            if result.data and result.data.check_digit_errors:
-                warnings.append(
-                    f"Check digit errors: {', '.join(result.data.check_digit_errors)}"
-                )
-
-            # Identify partially extracted fields
-            partially_extracted = []
-            if result.data:
-                partially_extracted = result.data.get_unavailable_fields()
-
-            return UploadResult(
-                success=True,
-                document_type="passport",
-                source_filename=filename,
-                form_fields=mapped_fields,
-                extracted_fields=extracted_fields,
-                warnings=warnings,
-                partially_extracted=partially_extracted,
-            )
+            # Fall back to MRZ-only extraction
+            return self._process_passport_mrz_only(tmp_path, filename)
 
         except ConnectionError as e:
             # Network errors - suggest retry
@@ -259,6 +230,133 @@ class UploadService:
                     tmp_path.unlink()
                 except OSError:
                     pass
+
+    def _process_passport_mrz_only(
+        self, tmp_path: Path, filename: str
+    ) -> UploadResult:
+        """Process passport using MRZ-only extraction.
+
+        Args:
+            tmp_path: Path to temporary image file
+            filename: Original filename
+
+        Returns:
+            UploadResult with passport extraction data
+        """
+        # Extract using passport service
+        result = self._passport_service.extract_single(tmp_path)
+
+        if not result.success:
+            return UploadResult(
+                success=False,
+                document_type="passport",
+                source_filename=filename,
+                form_fields={},
+                extracted_fields={},
+                warnings=[],
+                partially_extracted=[],
+                error=result.error or "Extraction failed",
+                error_code="EXTRACTION_FAILED",
+            )
+
+        # Map extracted data to form fields
+        mapped_fields = self._field_mapper.map_passport_data(result.data)
+
+        # Build extracted_fields dictionary
+        extracted_fields = self._build_extracted_fields(mapped_fields)
+
+        # Collect warnings
+        warnings = []
+        if result.data and not result.data.mrz_valid:
+            warnings.append("MRZ validation failed - please verify extracted data")
+        if result.data and result.data.check_digit_errors:
+            warnings.append(
+                f"Check digit errors: {', '.join(result.data.check_digit_errors)}"
+            )
+
+        # Identify partially extracted fields
+        partially_extracted = []
+        if result.data:
+            partially_extracted = result.data.get_unavailable_fields()
+
+        return UploadResult(
+            success=True,
+            document_type="passport",
+            source_filename=filename,
+            form_fields=mapped_fields,
+            extracted_fields=extracted_fields,
+            warnings=warnings,
+            partially_extracted=partially_extracted,
+        )
+
+    def _process_passport_with_crosscheck(
+        self, tmp_path: Path, filename: str
+    ) -> UploadResult:
+        """Process passport using CrossCheckService with VLM cross-validation.
+
+        Args:
+            tmp_path: Path to temporary image file
+            filename: Original filename
+
+        Returns:
+            UploadResult with passport extraction data and per-field confidence scores
+        """
+        from tryalma.crosscheck.models import ExtractionStatus
+
+        # Extract using crosscheck service
+        result = self._crosscheck_service.extract_and_crosscheck(tmp_path)  # type: ignore[union-attr]
+
+        if result.status == ExtractionStatus.ERROR:
+            return UploadResult(
+                success=False,
+                document_type="passport",
+                source_filename=filename,
+                form_fields={},
+                extracted_fields={},
+                warnings=[],
+                partially_extracted=[],
+                error=result.error or "Cross-check extraction failed",
+                error_code="EXTRACTION_FAILED",
+            )
+
+        # Map extracted data to form fields using per-field confidences
+        mapped_fields = self._field_mapper.map_passport_data_with_confidences(
+            result.passport_data, result.field_confidences
+        )
+
+        # Build extracted_fields dictionary
+        extracted_fields = self._build_extracted_fields(mapped_fields)
+
+        # Collect warnings
+        warnings = []
+        if result.status == ExtractionStatus.PARTIAL:
+            sources = ", ".join(result.sources_used)
+            warnings.append(f"Partial extraction - using {sources} only")
+        if result.mrz_error:
+            warnings.append(f"MRZ extraction issue: {result.mrz_error}")
+        if result.vlm_error:
+            warnings.append(f"VLM extraction issue: {result.vlm_error}")
+        if result.has_discrepancies():
+            critical = result.get_critical_discrepancies()
+            if critical:
+                warnings.append(
+                    f"Critical discrepancies found in: {', '.join(d.field_name for d in critical)}"
+                )
+
+        # Identify partially extracted fields
+        partially_extracted = []
+        if result.passport_data:
+            partially_extracted = result.passport_data.get_unavailable_fields()
+
+        return UploadResult(
+            success=True,
+            document_type="passport",
+            source_filename=filename,
+            form_fields=mapped_fields,
+            extracted_fields=extracted_fields,
+            warnings=warnings,
+            partially_extracted=partially_extracted,
+        )
 
     def _process_g28(self, file_storage: FileStorage, filename: str) -> UploadResult:
         """Process G-28 document through G28ParserService.

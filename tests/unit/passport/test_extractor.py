@@ -296,7 +296,7 @@ class TestMRZExtractorExtract:
         mock_result = MagicMock()
         mock_result.mrz_type = "TD3"
         mock_result.valid = True
-        mock_result.valid_score = 0.85  # PassportEye's confidence indicator
+        mock_result.valid_score = 85  # PassportEye returns 0-100 percentage
         mock_result.country = "UTO"
         mock_result.nationality = "UTO"
         mock_result.surname = "SMITH"

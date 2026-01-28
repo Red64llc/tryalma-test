@@ -190,5 +190,5 @@ class MRZExtractor:
             expiry_date=to_optional(mrz_result.expiration_date),
             document_number=to_optional(mrz_result.number),
             optional_data=to_optional(mrz_result.personal_number),
-            confidence=mrz_result.valid_score if hasattr(mrz_result, "valid_score") else None,
+            confidence=mrz_result.valid_score / 100.0 if hasattr(mrz_result, "valid_score") and mrz_result.valid_score is not None else None,
         )
