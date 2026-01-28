@@ -106,3 +106,7 @@ datasets/countries.json
 !datasets/samples/
 !datasets/scripts/
 !datasets/README.md
+
+.claude/
+.kiro/
+Claude.md
