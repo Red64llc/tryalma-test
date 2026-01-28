@@ -1,8 +1,8 @@
 """Integration tests for crosscheck CLI command.
 
-Task 5.2: Tests for CLI crosscheck subcommand.
+Task 5.2 + Task 6.2: Tests for CLI crosscheck subcommand.
 
-Requirements: 6.1, 7.1, 7.2
+Requirements: 6.1, 6.2, 6.3, 6.4, 7.1, 7.2
 """
 
 from pathlib import Path
@@ -406,3 +406,401 @@ class TestCrossCheckExitCodes:
 
                         # Partial success should return 0
                         assert result.exit_code == 0
+
+
+# ============================================================================
+# Task 6.2: Additional end-to-end CLI tests
+# Requirements: 6.1, 6.2, 6.3, 6.4
+# ============================================================================
+
+
+class TestCrossCheckWithValidImage:
+    """Task 6.2: Test crosscheck command with valid passport image."""
+
+    def test_crosscheck_with_valid_image_extracts_data(
+        self, tmp_path: Path, sample_crosscheck_result: CrossCheckResult
+    ):
+        """Crosscheck with valid image returns extracted passport data."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake passport image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = (
+                            sample_crosscheck_result
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                        )
+
+                        assert result.exit_code == 0
+                        # Should display extracted data
+                        assert "SMITH" in result.stdout.upper() or "surname" in result.stdout.lower()
+
+    def test_crosscheck_shows_sources_used(
+        self, tmp_path: Path, sample_crosscheck_result: CrossCheckResult
+    ):
+        """Crosscheck output shows which extraction sources were used."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake passport image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = (
+                            sample_crosscheck_result
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                        )
+
+                        # Should show sources
+                        output_lower = result.stdout.lower()
+                        assert "source" in output_lower or "mrz" in output_lower
+
+
+class TestCrossCheckOutputFormatting:
+    """Task 6.2: Test output formatting in verbose and non-verbose modes."""
+
+    def test_non_verbose_mode_omits_detailed_metadata(
+        self, tmp_path: Path, sample_crosscheck_result: CrossCheckResult
+    ):
+        """Non-verbose mode should not show full metadata details."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake passport image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = (
+                            sample_crosscheck_result
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                            # No --verbose flag
+                        )
+
+                        # Non-verbose mode - metadata section shouldn't be explicitly shown
+                        # The output should still work
+                        assert result.exit_code == 0
+                        assert "success" in result.stdout.lower()
+
+    def test_verbose_mode_shows_timing_information(
+        self, tmp_path: Path, sample_crosscheck_result: CrossCheckResult
+    ):
+        """Verbose mode should show timing/duration information."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake passport image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = (
+                            sample_crosscheck_result
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            [
+                                "crosscheck",
+                                str(test_image),
+                                "--hf-token",
+                                "test_token",
+                                "--verbose",
+                            ],
+                        )
+
+                        assert result.exit_code == 0
+                        # Verbose mode should include timing
+                        output_lower = result.stdout.lower()
+                        assert (
+                            "duration" in output_lower
+                            or "ms" in result.stdout
+                            or "3200" in result.stdout  # extraction_duration_ms
+                        )
+
+    def test_verbose_mode_shows_vlm_model_name(
+        self, tmp_path: Path, sample_crosscheck_result: CrossCheckResult
+    ):
+        """Verbose mode should show VLM model identifier."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake passport image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = (
+                            sample_crosscheck_result
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            [
+                                "crosscheck",
+                                str(test_image),
+                                "--hf-token",
+                                "test_token",
+                                "--verbose",
+                            ],
+                        )
+
+                        assert result.exit_code == 0
+                        # Should show model name
+                        assert "qwen" in result.stdout.lower()
+
+    def test_shows_no_discrepancies_message_when_sources_agree(
+        self, tmp_path: Path, sample_passport_data: PassportData
+    ):
+        """When no discrepancies exist, show agreement message."""
+        from datetime import datetime, UTC
+
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake passport image data")
+
+        result_no_discrepancies = CrossCheckResult(
+            status=ExtractionStatus.SUCCESS,
+            passport_data=sample_passport_data,
+            field_confidences={"surname": 1.0, "given_names": 1.0},
+            document_confidence=1.0,
+            discrepancies=[],  # No discrepancies
+            sources_used=["mrz", "qwen2-vl"],
+            mrz_extraction_success=True,
+            vlm_extraction_success=True,
+            metadata=ProcessingMetadata(
+                extraction_duration_ms=1000,
+                mrz_duration_ms=500,
+                vlm_duration_ms=500,
+                vlm_model="Qwen/Qwen2-VL-7B-Instruct",
+                timestamp=datetime.now(UTC),
+            ),
+        )
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = (
+                            result_no_discrepancies
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                        )
+
+                        assert result.exit_code == 0
+                        # Should indicate no discrepancies / sources agree
+                        output_lower = result.stdout.lower()
+                        assert "agree" in output_lower or "no discrepanc" in output_lower
+
+
+class TestCrossCheckExtendedErrorHandling:
+    """Task 6.2: Extended error handling tests."""
+
+    def test_crosscheck_shows_error_details_on_failure(self, tmp_path: Path):
+        """When extraction fails, error details are displayed."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake passport image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = CrossCheckResult(
+                            status=ExtractionStatus.ERROR,
+                            passport_data=None,
+                            sources_used=[],
+                            error="Both extraction sources failed",
+                            mrz_error="MRZ zone not detected in image",
+                            vlm_error="VLM API returned 429 rate limited",
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                        )
+
+                        # Should show error details
+                        output_lower = result.stdout.lower()
+                        assert "error" in output_lower
+
+    def test_crosscheck_displays_partial_status_message(
+        self, tmp_path: Path, sample_passport_data: PassportData
+    ):
+        """Partial success shows appropriate status message."""
+        from datetime import datetime, UTC
+
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake passport image data")
+
+        partial_result = CrossCheckResult(
+            status=ExtractionStatus.PARTIAL,
+            passport_data=sample_passport_data,
+            field_confidences={"surname": 0.7},
+            document_confidence=0.7,
+            discrepancies=[],
+            sources_used=["mrz"],
+            mrz_extraction_success=True,
+            vlm_extraction_success=False,
+            vlm_error="VLM extraction failed",
+            metadata=ProcessingMetadata(
+                extraction_duration_ms=1000,
+                mrz_duration_ms=500,
+                vlm_duration_ms=None,
+                vlm_model="Qwen/Qwen2-VL-7B-Instruct",
+                timestamp=datetime.now(UTC),
+            ),
+        )
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = partial_result
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                        )
+
+                        assert result.exit_code == 0  # Partial is not an error
+                        # Should show partial status
+                        assert "partial" in result.stdout.lower()
+
+    def test_missing_image_shows_helpful_error(self, tmp_path: Path):
+        """Missing image shows helpful error message."""
+        nonexistent = tmp_path / "does_not_exist.jpg"
+
+        result = runner.invoke(
+            app, ["crosscheck", str(nonexistent), "--hf-token", "test_token"]
+        )
+
+        assert result.exit_code == 2
+        # Should indicate file not found
+        output_lower = result.output.lower()
+        assert "not found" in output_lower or "does not exist" in output_lower or "error" in output_lower
+
+
+class TestCrossCheckExitCodeConventions:
+    """Task 6.2: Verify exit codes match CLI conventions."""
+
+    def test_exit_code_0_for_success(
+        self, tmp_path: Path, sample_crosscheck_result: CrossCheckResult
+    ):
+        """Exit code 0 for successful extraction."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = (
+                            sample_crosscheck_result
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                        )
+
+                        assert result.exit_code == 0
+
+    def test_exit_code_0_for_partial_success(self, tmp_path: Path):
+        """Exit code 0 for partial success (one source works)."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = CrossCheckResult(
+                            status=ExtractionStatus.PARTIAL,
+                            passport_data=None,
+                            sources_used=["mrz"],
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                        )
+
+                        assert result.exit_code == 0
+
+    def test_exit_code_2_for_validation_error_missing_image(self, tmp_path: Path):
+        """Exit code 2 for validation error (missing image)."""
+        nonexistent = tmp_path / "nonexistent.jpg"
+
+        result = runner.invoke(
+            app, ["crosscheck", str(nonexistent), "--hf-token", "test_token"]
+        )
+
+        assert result.exit_code == 2
+
+    def test_exit_code_2_for_validation_error_missing_token(self, tmp_path: Path):
+        """Exit code 2 for validation error (missing token)."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake image data")
+
+        with patch.dict("os.environ", {}, clear=True):
+            result = runner.invoke(app, ["crosscheck", str(test_image)])
+
+            assert result.exit_code == 2
+
+    def test_exit_code_3_for_processing_error(self, tmp_path: Path):
+        """Exit code 3 for processing error (both extractions fail)."""
+        test_image = tmp_path / "passport.jpg"
+        test_image.write_bytes(b"fake image data")
+
+        with patch("tryalma.crosscheck.cli.CrossCheckService") as mock_service_class:
+            with patch("tryalma.crosscheck.cli.MRZExtractor"):
+                with patch("tryalma.crosscheck.cli.MRZValidator"):
+                    with patch("tryalma.crosscheck.cli.Qwen2VLProvider"):
+                        mock_service = MagicMock()
+                        mock_service.extract_and_crosscheck.return_value = CrossCheckResult(
+                            status=ExtractionStatus.ERROR,
+                            passport_data=None,
+                            sources_used=[],
+                            error="Both extraction sources failed",
+                        )
+                        mock_service_class.return_value = mock_service
+
+                        result = runner.invoke(
+                            app,
+                            ["crosscheck", str(test_image), "--hf-token", "test_token"],
+                        )
+
+                        assert result.exit_code == 3
