@@ -24,6 +24,7 @@ from tryalma.crosscheck.models import (
     VisualZoneData,
 )
 from tryalma.crosscheck.qwen2vl_provider import Qwen2VLProvider
+from tryalma.crosscheck.service import CrossCheckService
 
 __all__ = [
     # Models
@@ -48,4 +49,6 @@ __all__ = [
     "FieldCrossValidator",
     "ConfidenceScorer",
     "DiscrepancyReporter",
+    # Service (Task 4)
+    "CrossCheckService",
 ]
