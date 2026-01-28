@@ -5,12 +5,15 @@ with confidence scoring and discrepancy reporting.
 """
 
 from tryalma.crosscheck.config import ConfidenceConfig, CrossCheckConfig
+from tryalma.crosscheck.confidence_scorer import ConfidenceScorer
+from tryalma.crosscheck.discrepancy_reporter import DiscrepancyReporter
 from tryalma.crosscheck.exceptions import (
     ConfigurationError,
     CrossCheckError,
     VLMExtractionError,
     VLMTimeoutError,
 )
+from tryalma.crosscheck.field_cross_validator import FieldCrossValidator
 from tryalma.crosscheck.models import (
     CrossCheckResult,
     DiscrepancySeverity,
@@ -41,4 +44,8 @@ __all__ = [
     "ConfigurationError",
     # Providers
     "Qwen2VLProvider",
+    # Core Logic (Task 3)
+    "FieldCrossValidator",
+    "ConfidenceScorer",
+    "DiscrepancyReporter",
 ]
